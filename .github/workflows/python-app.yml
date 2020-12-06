@@ -34,3 +34,9 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+    - name: Install build dependencies
+      run: |
+        pip install setuptools wheel twine
+    - name: Build the application
+      run: |
+        python setup.py sdist bdist_wheel
