@@ -9,7 +9,7 @@
 from setuptools import setup
 from os.path import join, dirname
 
-with open(join(dirname(__file__), 'garmin_workouts/version.py'), 'r') as f:
+with open(join(dirname(__file__), 'garmin_workouts/version'), 'r') as f:
     version = f.read().strip()
 
 with open(join(dirname(__file__), 'requirements.txt'), 'r') as f:
@@ -21,7 +21,7 @@ with open(join(dirname(__file__), 'README.rst'), 'r') as f:
 setup(
     name='garmin-workouts-cli',
     version=version,
-    description="Command line application to work with Garmin Connect Workouts",
+    description="Command line application to work with Garmin Workouts",
     long_description=long_description,
     url='https://github.com/astaruch/garmin-workouts-cli',
     author='Andrej Staruch',
