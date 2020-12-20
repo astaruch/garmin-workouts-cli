@@ -3,6 +3,7 @@ import http
 import os
 import re
 import logging
+import configparser
 
 from appdirs import AppDirs
 
@@ -19,10 +20,13 @@ log = logging.getLogger(__name__)
 
 
 class Login():
-    def __init__(self, username=None, password=None):
-        self.username = username
-        self.password = password
+    def __init__(self, args={}):
+        self.username = args.username if 'username' in args else None
+        self.password = args.password if 'password' in args else None
+        self.config_path = os.path.join(os.path.curdir, args.config) if \
+            'config' in args else None
         self.cookie_jar_path = cookie_jar_path
+        self.session = None
 
     def login(self):
         self.session = requests.Session()
@@ -34,14 +38,26 @@ class Login():
         response = self.session.get("https://connect.garmin.com/modern/settings", allow_redirects=False)
         if response.status_code != 200:
             self.authenticate(self.username, self.password)
+            log.info('Login successful')
         else:
             log.debug('Using stored cookies')
-        log.info("Login successful")
 
     def authenticate(self, username, password):
         log.info("Login with your Garmin Connect account. If you don't "
                  "have Garmin Connect account, head over to "
                  "https://connect.garmin.com/signin to create one.")
+        if os.path.exists(self.config_path):
+            config = configparser.ConfigParser()
+            config.read_file(open(self.config_path))
+            if 'auth' in config:
+                auth = config['auth']
+                if not username and 'username' in auth:
+                    log.info('Loading username from %s' % self.config_path)
+                    username = auth['username']
+                if not password and 'password' in auth:
+                    log.info('Loading password from %s' % self.config_path)
+                    password = auth['password']
+
         if not username:
             username = input('Username: ')
         if not password:
@@ -77,6 +93,21 @@ class Login():
 
         self.session.cookies.save(ignore_discard=True, ignore_expires=True)
         self.session.close()
+
+    def get_session(self):
+        return self.session
+
+    def logout(self):
+        if self.session:
+            response = self.session.get('https://connect.garmin.com/modern/auth/logout')
+            response.raise_for_status()
+            self.session.cookies.clear()
+
+        if os.path.exists(self.cookie_jar_path):
+            os.remove(self.cookie_jar_path)
+
+        log.info('Logged out')
+
 
     @staticmethod
     def extract_auth_ticket_url(auth_response):

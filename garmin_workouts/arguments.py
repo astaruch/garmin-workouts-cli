@@ -2,6 +2,7 @@ import argparse
 import logging
 
 from login import Login
+from export import Export
 
 log = logging.getLogger(__name__)
 
@@ -16,24 +17,32 @@ class CLI:
         login_parser = subparsers.add_parser(
             'login', help='Log in to the Garmin Connect')
         login_parser.add_argument(
-            '-u', '--username', dest='username')
+            '-u', '--username', dest='username',
+            help='Username used in Garmin Connect')
         login_parser.add_argument(
-            '-p', '--password', dest='password')
+            '-p', '--password', dest='password',
+            help='Password for the account')
+        login_parser.add_argument(
+            '-c', '--config', dest='config', default='config.ini',
+            help='Path to the config file. Check documentation to see possible sections.'
+        )
 
-        logout_parser = subparsers.add_parser(
+        subparsers.add_parser(
             'logout', help='Log out from the Garmin Connect')
 
         export_parser = subparsers.add_parser(
-            'export', help='Export all workouts')
+            'export', help='Export workouts from the Garmin Connect')
         export_parser.add_argument(
             '--type', type=str, choices=['json', 'yaml'], dest='export_type')
 
         args = self.parser.parse_args()
 
         if args.command == 'login':
-            login = Login(args.username, args.password)
+            login = Login(args)
             login.login()
         elif args.command == 'logout':
-            print('Logging out...')
+            login = Login()
+            login.logout()
         elif args.command == 'export':
-            print('Exporting data...')
+            export = Export(args)
+            export.export()
