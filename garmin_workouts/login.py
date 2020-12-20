@@ -50,7 +50,8 @@ class Login():
         form_data = {
             "username": username,
             "password": password,
-            "embed": "false"
+            "embed": "false",
+            "rememberme": "on"
         }
 
         request_params = {
