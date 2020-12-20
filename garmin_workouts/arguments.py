@@ -33,7 +33,8 @@ class CLI:
         export_parser = subparsers.add_parser(
             'export', help='Export workouts from the Garmin Connect')
         export_parser.add_argument(
-            '--type', type=str, choices=['json', 'yaml'], dest='export_type')
+            '-t', '--type', type=str, choices=['json', 'yaml', 'raw'],
+            dest='export_type')
 
         args = self.parser.parse_args()
 
