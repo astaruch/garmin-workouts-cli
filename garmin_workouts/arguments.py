@@ -23,7 +23,7 @@ class CLI:
             '-p', '--password', dest='password',
             help='Password for the account')
         login_parser.add_argument(
-            '-c', '--config', dest='config', default='config.ini',
+            '-c', '--config', dest='config', default='config.ini', type=str,
             help='Path to the config file. Check documentation to see possible sections.'
         )
 

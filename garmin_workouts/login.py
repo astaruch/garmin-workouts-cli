@@ -24,7 +24,7 @@ class Login():
         self.username = args.username if 'username' in args else None
         self.password = args.password if 'password' in args else None
         self.config_path = os.path.join(os.path.curdir, args.config) if \
-            'config' in args else None
+            'config' in args else 'config.ini'
         self.cookie_jar_path = cookie_jar_path
         self.session = None
 
@@ -46,7 +46,7 @@ class Login():
         log.info("Login with your Garmin Connect account. If you don't "
                  "have Garmin Connect account, head over to "
                  "https://connect.garmin.com/signin to create one.")
-        if os.path.exists(self.config_path):
+        if self.config_path and os.path.exists(self.config_path):
             config = configparser.ConfigParser()
             config.read_file(open(self.config_path))
             if 'auth' in config:
