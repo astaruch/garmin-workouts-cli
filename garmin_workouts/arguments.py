@@ -1,13 +1,9 @@
 import argparse
 import logging
-import sys
 
 from login import Login
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler(sys.stderr)
-log.addHandler(console_handler)
 
 
 class CLI:

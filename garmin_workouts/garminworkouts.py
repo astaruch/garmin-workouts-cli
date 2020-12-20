@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
+import logging
+import sys
+
 from arguments import CLI
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 
 def main():
