@@ -1,0 +1,41 @@
+{
+  "sportType": {
+    "sportTypeId": 1,
+    "sportTypeKey": "running"
+  },
+  "workoutName": "random workout",
+  "workoutSegments": {
+    "segmentOrder": 1,
+    "sportType": {
+      "sportTypeId": 1,
+      "sportTypeKey": "running"
+    },
+    "workoutSteps": [
+      {
+        "description": null,
+        "endCondition": {
+          "conditionTypeId": 2,
+          "conditionTypeKey": "time"
+        },
+        "endConditionCompare": null,
+        "endConditionValue": 70,
+        "endConditionZone": null,
+        "preferredEndConditionUnit": null,
+        "stepId": null,
+        "stepOrder": 1,
+        "stepType": {
+          "stepTypeId": 1,
+          "stepTypeKey": "warmup"
+        },
+        "targetType": {
+          "workoutTargetTypeId": 6,
+          "workoutTargetTypeKey": "pace.zone"
+        },
+        "targetValueOne": 3.0303030303030303,
+        "targetValueTwo": 2.7777777777777777,
+        "type": "ExecutableStepDTO",
+        "zoneNumber": null
+      }
+    ]
+  }
+}
