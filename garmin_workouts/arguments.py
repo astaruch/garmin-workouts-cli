@@ -1,8 +1,10 @@
 import argparse
 import logging
 
+from create import Create
 from login import Login
 from export import Export
+from import_workouts import Import
 
 log = logging.getLogger(__name__)
 
@@ -30,11 +32,42 @@ class CLI:
         subparsers.add_parser(
             'logout', help='Log out from the Garmin Connect')
 
+        create_parser = subparsers.add_parser(
+            'create', help='Create a new workout from the command line',
+        )
+
+        create_parser.add_argument(
+            '--sample-workout', help='Create and upload a sample workout',
+            action='store_true', dest='sample_workout'
+        )
+
+        create_parser.add_argument(
+            '-k', '--keep-json', help='Keep the JSON file which is created '
+            'for the request', action='store_true', dest='keep_json'
+        )
+
+        create_parser.add_argument(
+            '-x', '--no-upload', help="Don't upload the workout to the "
+            " Garmin Connect", action='store_true', dest='no_upload'
+        )
+
+        create_parser.add_argument(
+            '-n', '--name', help='Name of the new workout. If ommited, '
+            'name "Workout <hash>" would be used. E.g. "Workout e3f1"',
+            dest='workout_name'
+        )
+
         export_parser = subparsers.add_parser(
-            'export', help='Export workouts from the Garmin Connect')
+            'export', help='Export workouts from the Garmin Connect to the file')
         export_parser.add_argument(
             '-t', '--type', type=str, choices=['json', 'yaml', 'raw'],
             dest='export_type')
+
+        import_parser = subparsers.add_parser(
+            'import', help='Import workouts to the Garmin Connect from a file')
+        import_parser.add_argument(
+            '-f', '--file', type=str, help='Path to the file containing '
+            'workouts definition', dest='import_file')
 
         args = self.parser.parse_args()
 
@@ -47,3 +80,10 @@ class CLI:
         elif args.command == 'export':
             export = Export(args)
             export.export()
+        elif args.command == 'import':
+            import_workouts = Import()
+            import_workouts.import_workouts()
+        elif args.command == 'create':
+            Create(args)
+        else:
+            self.parser.print_help()
