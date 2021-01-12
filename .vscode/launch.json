@@ -11,6 +11,30 @@
             "program": "${workspaceFolder}/garmin_workouts/garminworkouts.py",
             "console": "integratedTerminal",
             "args": ["login"],
-        }
+        },
+        {
+            "name": "Export",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/garmin_workouts/garminworkouts.py",
+            "console": "integratedTerminal",
+            "args": ["export"],
+        },
+        {
+            "name": "Import",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/garmin_workouts/garminworkouts.py",
+            "console": "integratedTerminal",
+            "args": ["import"],
+        },
+        {
+            "name": "Create Sample Workout",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/garmin_workouts/garminworkouts.py",
+            "console": "integratedTerminal",
+            "args": ["create", "--sample-workout"],
+        },
     ]
 }
