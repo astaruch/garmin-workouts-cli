@@ -18,16 +18,28 @@ class Export():
         else:
             self.order_seq = 'DESC'
         self.limit = args.export_limit if 'export_limit' in args else 999
+        self.stdout = not args.export_file and args.export_file != ''
+        if args.export_file != '':
+            self.filename = args.export_file
+        else:
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            if self.export_type == 'yml':
+                extension = 'yml'
+            else:
+                extension = 'json'
+            self.filename = f'workouts_{timestamp}.{extension}'
 
     def export(self):
         if self.export_type == 'json':
             self.export_json()
         elif self.export_type == 'raw':
             self.export_raw()
+        elif self.export_type == 'yml':
+            self.export_yml()
         else:
             raise NotImplementedError
 
-    def export_raw(self):
+    def download_workouts(self):
         workouts_url = "https://connect.garmin.com/modern/proxy/workout-service/workouts"
         workouts_params = {
             "start": 1,
@@ -43,10 +55,17 @@ class Export():
             params=workouts_params)
         workouts_response.raise_for_status()
 
-        response_jsons = json.loads(workouts_response.text)
+        return json.loads(workouts_response.text)
 
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        filename = f'workouts_{timestamp}.json'
-        with open(filename, 'w') as outfile:
-            log.info('Storing workouts to the %s' % filename)
-            json.dump(response_jsons, outfile, indent=2)
+    def export_json(self):
+        print(123)
+
+    def export_raw(self):
+        response_jsons = self.download_workouts()
+
+        if self.stdout:
+            print(json.dumps(response_jsons, indent=2))
+        else:
+            with open(self.filename, 'w') as outfile:
+                log.info('Storing workouts to the %s' % self.filename)
+                json.dump(response_jsons, outfile, indent=2)

@@ -61,7 +61,7 @@ class CLI:
             'export', help='Export workouts from the Garmin Connect to the '
             'file')
         export_parser.add_argument(
-            '-t', '--type', type=str, choices=['json', 'yaml', 'raw'],
+            '--type', type=str, choices=['json', 'yml', 'raw'],
             dest='export_type')
         export_parser.add_argument(
             '--sort', type=str, choices=['asc', 'desc'],
@@ -71,6 +71,11 @@ class CLI:
         export_parser.add_argument(
             '--limit', type=int, dest='export_limit',
             help="Limit maximum number of workout",
+        )
+        export_parser.add_argument(
+            '-f', '--file', type=str, help='write to a file, instead of STDOUT'
+            '. Leave the argument and program will generate a one.',
+            nargs='?', const='', dest='export_file', metavar='FILENAME'
         )
         import_parser = subparsers.add_parser(
             'import', help='Import workouts to the Garmin Connect from a file')
