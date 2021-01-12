@@ -4,7 +4,7 @@ import logging
 from create import Create
 from login import Login
 from export import Export
-from import_workouts import Import
+# from import_workouts import Import
 
 log = logging.getLogger(__name__)
 
@@ -58,11 +58,20 @@ class CLI:
         )
 
         export_parser = subparsers.add_parser(
-            'export', help='Export workouts from the Garmin Connect to the file')
+            'export', help='Export workouts from the Garmin Connect to the '
+            'file')
         export_parser.add_argument(
             '-t', '--type', type=str, choices=['json', 'yaml', 'raw'],
             dest='export_type')
-
+        export_parser.add_argument(
+            '--sort', type=str, choices=['asc', 'desc'],
+            dest='export_sort', help="Default: asc",
+            default='asc'
+        )
+        export_parser.add_argument(
+            '--limit', type=int, dest='export_limit',
+            help="Limit maximum number of workout",
+        )
         import_parser = subparsers.add_parser(
             'import', help='Import workouts to the Garmin Connect from a file')
         import_parser.add_argument(

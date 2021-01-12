@@ -13,6 +13,11 @@ class Export():
         login = Login()
         login.login()
         self.session = login.get_session()
+        if args.export_sort == 'asc':
+            self.order_seq = 'ASC'
+        else:
+            self.order_seq = 'DESC'
+        self.limit = args.export_limit if 'export_limit' in args else 999
 
     def export(self):
         if self.export_type == 'json':
@@ -26,11 +31,11 @@ class Export():
         workouts_url = "https://connect.garmin.com/modern/proxy/workout-service/workouts"
         workouts_params = {
             "start": 1,
-            "limit": 999,
+            "limit": self.limit,
             "myWorkoutsOnly": True,
             "sharedWorkoutsOnly": False,
             "orderBy": "WORKOUT_NAME",
-            "orderSeq": "ASC",
+            "orderSeq": self.order_seq,
             "includeAtp": False,
         }
         workouts_response = self.session.get(
