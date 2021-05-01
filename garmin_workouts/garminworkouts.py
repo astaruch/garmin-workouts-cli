@@ -5,7 +5,7 @@ import sys
 
 from arguments import CLI
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
 def main():

@@ -14,6 +14,11 @@ class CLI:
         self.parser = argparse.ArgumentParser(prog='garmin-workouts')
 
     def init_parser(self):
+        self.parser.add_argument(
+            "-v", "--verbose", action="count", default=0,
+            help="Increase output verbosity "
+            "(use up to 3 times)")
+
         subparsers = self.parser.add_subparsers(dest='command')
 
         login_parser = subparsers.add_parser(
@@ -84,6 +89,9 @@ class CLI:
             'workouts definition', dest='import_file')
 
         args = self.parser.parse_args()
+
+        if args.verbose:
+            logging.getLogger().setLevel(logging.DEBUG)
 
         if args.command == 'login':
             login = Login(args)
