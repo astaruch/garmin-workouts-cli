@@ -11,15 +11,24 @@ log = logging.getLogger(__name__)
 
 class CLI:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(prog='garmin-workouts')
+        self.parser = argparse.ArgumentParser(prog='garmin-workouts',
+                                              add_help=False)
 
     def init_parser(self):
-        self.parser.add_argument(
+        # Basic options
+        options = self.parser.add_argument_group('Options')
+        options.add_argument(
             "-v", "--verbose", action="count", default=0,
-            help="Increase output verbosity "
-            "(use up to 3 times)")
+            help="Increase output verbosity ")
+        options.add_argument(
+            "-h", "--help", action='store_true',
+            help="Show this help message and exit"
+        )
 
-        subparsers = self.parser.add_subparsers(dest='command')
+        # Sub-commands
+        subparsers = self.parser.add_subparsers(title='Commands',
+                                                dest='command',
+                                                metavar='COMMAND')
 
         login_parser = subparsers.add_parser(
             'login', help='Log in to the Garmin Connect')
@@ -92,6 +101,10 @@ class CLI:
 
         if args.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
+
+        if args.help:
+            self.parser.print_help()
+            exit(0)
 
         if args.command == 'login':
             login = Login(args)
