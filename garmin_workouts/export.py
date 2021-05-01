@@ -69,3 +69,6 @@ class Export():
             with open(self.filename, 'w') as outfile:
                 log.info('Storing workouts to the %s' % self.filename)
                 json.dump(response_jsons, outfile, indent=2)
+
+    def export_yml(self):
+        raise NotImplementedError
