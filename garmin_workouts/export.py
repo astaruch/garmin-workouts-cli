@@ -40,7 +40,7 @@ class Export():
             raise NotImplementedError
 
     def download_workouts(self):
-        workouts_url = "https://connect.garmin.com/modern/proxy/workout-service/workouts"
+        workouts_url = "https://connect.garmin.com/proxy/workout-service/workouts"
         workouts_params = {
             "start": 1,
             "limit": self.limit,
