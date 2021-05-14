@@ -4,6 +4,7 @@ import os
 import re
 import logging
 import configparser
+from fake_useragent import UserAgent
 
 from appdirs import AppDirs
 
@@ -75,7 +76,8 @@ class Login():
         }
 
         headers = {
-            'origin': 'https://sso.garmin.com'
+            'origin': 'https://sso.garmin.com',
+            'User-Agent': self.genenerate_user_agent()
         }
 
         auth_response = self.session.post(
@@ -108,6 +110,9 @@ class Login():
 
         log.info('Logged out')
 
+    def genenerate_user_agent(self):
+        ua = UserAgent()
+        return ua.random
 
     @staticmethod
     def extract_auth_ticket_url(auth_response):
