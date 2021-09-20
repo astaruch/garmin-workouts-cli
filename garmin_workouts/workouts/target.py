@@ -14,6 +14,12 @@ def pace_to_mps(pace):
     """
     return 1000 / (pace.mins * 60 + pace.secs)
 
+def mps_to_pace(mps):
+    """
+    For the given meters per seconds,
+    return minutes per km (in float format)
+    """
+    return 1000 / (60 * mps)
 
 class Pace:
     def __init__(self, minutes, seconds):
