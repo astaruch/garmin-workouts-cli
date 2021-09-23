@@ -4,7 +4,7 @@ import logging
 from create import Create
 from login import Login
 from export import Export
-# from import_workouts import Import
+from import_workouts import Import
 
 log = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class CLI:
             export = Export(args)
             export.export()
         elif args.command == 'import':
-            import_workouts = Import()
+            import_workouts = Import(args)
             import_workouts.import_workouts()
         elif args.command == 'create':
             Create(args)
