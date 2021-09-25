@@ -55,6 +55,8 @@ class Export():
                 extension = 'json'
             self.filename = f'workouts_{timestamp}.{extension}'
 
+        self.export()
+
     def export(self):
         if self.export_type == 'json':
             self.export_json()

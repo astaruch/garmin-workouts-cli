@@ -31,11 +31,9 @@ def main():
         login = Login()
         login.logout()
     elif args.command == 'export':
-        export = Export(args)
-        export.export()
+        Export(args)
     elif args.command == 'import':
-        import_workouts = Import(args)
-        import_workouts.import_workouts()
+        Import(args)
     elif args.command == 'create':
         Create(args)
     else:

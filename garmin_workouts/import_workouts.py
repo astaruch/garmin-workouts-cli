@@ -37,6 +37,8 @@ class Import():
         self.session = login.get_session()
         self.filename = args.import_file
 
+        self.import_workouts()
+
     def import_workouts(self):
         workout_obj = self.parse_yaml_file(self.filename)
 
