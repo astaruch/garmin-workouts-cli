@@ -1,36 +1,15 @@
 import logging
 import json
 import time
-
-import math
 import yaml
 
 from typing import List
 
 from login import Login
+from libs.parser import WorkoutParser
+
 
 log = logging.getLogger(__name__)
-
-
-def mps_to_min_per_km(mps):
-    mins_per_km = 1000 / (60 * mps)
-
-    print(f"mps={mps}. min/km={mins_per_km}")
-
-    minutes = math.floor(mins_per_km)
-
-    minutes_rest = mins_per_km - minutes
-
-    seconds = round(60 * minutes_rest)
-
-    print(f"minutes={minutes}; minutes_rest={minutes_rest}; seconds={seconds}")
-
-    return (minutes, seconds)
-
-
-def mps_to_pace_string(mps):
-    minutes, seconds = mps_to_min_per_km(mps)
-    return f"{minutes}:{seconds} min/km"
 
 
 class Export():
@@ -91,7 +70,7 @@ class Export():
 
     def get_workouts_ids(self) -> List[int]:
         response_json = self.get_workouts_info()
-        log.debug(print(json.dumps(response_json, indent=2)))
+        # log.debug(print(json.dumps(response_json, indent=2)))
         ids = []
 
         for workout in response_json:
@@ -131,81 +110,13 @@ class Export():
         workout = self.get_workout(workout_id)
 
         try:
-            workout_instance = self.parse_run_from_json(workout)
+            workout_parser = WorkoutParser(garmin_format=workout)
+            workout_instance = workout_parser.get_own_format()
         except Exception as err:
             print("Problem with parsing")
             print(json.dumps(workout, indent=2))
             print(workout)
             raise err
 
-        print(workout_instance)
+        # print(workout_instance)
         print(yaml.dump(workout_instance, default_flow_style=False))
-
-
-    def parse_run_from_json(self, run_json):
-        workout = {}
-        name = run_json["workoutName"]
-        workout["name"] = name
-
-        running_steps_json_array = run_json["workoutSegments"][0]["workoutSteps"]
-
-        steps = []
-
-        for running_step_json in running_steps_json_array:
-            step = self.parse_run_step_from_json(running_step_json)
-            steps.append(step)
-
-        workout["steps"] = steps
-        return {
-            "run": workout
-        }
-
-    def parse_run_step_from_json(self, step_json):
-        step = {}
-        type = step_json["type"]
-
-        if type == "RepeatGroupDTO":
-            step["type"] = "repetition"
-
-            count = step_json["numberOfIterations"]
-            step["count"] = count
-
-            sub_steps_json_array = step_json["workoutSteps"]
-            sub_steps = []
-
-            for sub_step_json in sub_steps_json_array:
-                sub_step = self.parse_run_step_from_json(sub_step_json)
-                sub_steps.append(sub_step)
-
-            step["steps"] = sub_steps
-        elif type == "ExecutableStepDTO":
-            step_type = step_json["stepType"]["stepTypeKey"]
-            if step_type == "interval":
-                step["type"] = "run"
-            elif step_type == "recovery":
-                step["type"] = "recovery"
-            else:
-                raise ValueError("type of step unknown")
-
-            duration_type = step_json["endCondition"]["conditionTypeKey"]
-            if duration_type == "distance":
-                distance = step_json["endConditionValue"]
-                step["distance"] = distance
-            elif duration_type == "lap.button":
-                step["lap_button"] = True
-            else:
-                raise ValueError("type of duration (end condition) unknown")
-
-            target_type = step_json["targetType"]["workoutTargetTypeKey"]
-            if target_type == "pace.zone":
-                pace_from = mps_to_pace_string(step_json["targetValueOne"])
-                pace_to = mps_to_pace_string(step_json["targetValueTwo"])
-
-                step["pace_from"] = pace_from
-                step["pace_to"] = pace_to
-            elif target_type == "no.target":
-                pass
-        else:
-            raise ValueError("type of step unknown")
-
-        return step
