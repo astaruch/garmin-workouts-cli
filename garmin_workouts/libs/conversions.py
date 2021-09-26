@@ -26,3 +26,23 @@ def mps_to_pace_string(mps):
     """
     minutes, seconds = mps_to_min_per_km(mps)
     return f"{minutes}:{seconds} min/km"
+
+
+def pace_string_to_mps(pace_string):
+    # type: (str) -> float
+    """
+    Convert pace string (MIN:SECS min/km) -> meters per second.
+
+    Return float.
+    """
+    if ' ' in pace_string:
+        value, _ = pace_string.split()
+    else:
+        value = pace_string
+
+    if ':' not in value:
+        raise ValueError("missing symobl':' in the pace. "
+                         "Expected pace in format 'MM:SS', got: ", value)
+    minutes, seconds = value.split(':')
+
+    return 1000 / (int(minutes) * 60 + int(seconds))

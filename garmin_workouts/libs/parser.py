@@ -1,9 +1,15 @@
 
-from libs.conversions import mps_to_pace_string
+import logging
 
+
+from libs.conversions import mps_to_pace_string, pace_string_to_mps
 from libs.exception import \
     GarminConnectObjectError, \
-    GarminConnectNotImplementedError
+    GarminConnectNotImplementedError, \
+    OwnFormatDataObjectError, \
+    OwnFormatDataObjectNotImplementedError
+
+log = logging.getLogger(__name__)
 
 
 class WorkoutParser():
@@ -47,6 +53,7 @@ class WorkoutParser():
         Parses the Garmin Connect API object and return dictionary in
         our own format.
         """
+        log.info("Parsing Garmin Connect API object..")
         own = {}
 
         if "workoutName" not in garmin:
@@ -165,3 +172,140 @@ class WorkoutParser():
                                                    garmin_step)
 
         return own_step
+
+    def parse_own_format(self, own):
+        # type: (dict) -> dict
+        """
+        Parses our own format dictionary, and returns
+        dictionary in in Garmin Connect API dictionary format.
+        """
+        log.info("Parsing own format data object..")
+        garmin = {}
+        self.step_index = 1
+
+        garmin["sportType"] = {
+            "sportTypeId": 1,
+            "sportTypeKey": "running"
+        }
+
+        if "name" not in own:
+            raise OwnFormatDataObjectError("name", own)
+
+        garmin["workoutName"] = own["name"]
+
+        segments = []
+        segment_1 = {}
+        segment_1["segmentOrder"] = 1
+        segment_1["sportType"] = {
+            "sportTypeId": 1,
+            "sportTypeKey": "running"
+        }
+        if "steps" not in own:
+            raise OwnFormatDataObjectError("steps", own)
+
+        garmin_steps = []
+        for own_step in own["steps"]:
+            garmin_step = self.parse_own_format_running_step(own_step)
+            garmin_steps.append(garmin_step)
+
+        segment_1["workoutSteps"] = garmin_steps
+        segments.append(segment_1)
+        garmin["workoutSegments"] = segments
+        return garmin
+
+    def parse_own_format_running_step(self, own_step):
+        # type: (dict) -> dict
+        """
+        Parses one running step from our own format, and return it
+        in Garmin Connect API format dictionary.
+        """
+        garmin_step = {}
+        garmin_step["stepOrder"] = self.step_index
+        self.step_index += 1
+
+        if "type" not in own_step:
+            raise OwnFormatDataObjectError("type", own_step)
+
+        type = own_step["type"]
+        if type == "repetition":
+            garmin_step["type"] = "RepeatGroupDTO"
+            garmin_step["stepType"] = {
+                "stepTypeId": 6,
+                "stepTypeKey": "repeat"
+            }
+            # NOTE: childStepId and smartRepeat both needs to be in the object
+            #       otherwise Garmin server throws 500 Internal Error
+            # TODO: Check what 'childStepId' is doing.
+            garmin_step["childStepId"] = 1
+            # TODO: Check what really 'smartRepeat' do
+            garmin_step["smartRepeat"] = False
+            if "count" not in own_step:
+                raise OwnFormatDataObjectError("count", own_step)
+
+            garmin_step["numberOfIterations"] = own_step["count"]
+
+            if "steps" not in own_step:
+                raise OwnFormatDataObjectError("steps", own_step)
+
+            garmin_substeps = []
+            for own_substep in own_step["steps"]:
+                garmin_substep = \
+                    self.parse_own_format_running_step(own_substep)
+                garmin_substeps.append(garmin_substep)
+
+            garmin_step["workoutSteps"] = garmin_substeps
+        elif type == "run" or type == "recovery":
+            garmin_step["type"] = "ExecutableStepDTO"
+
+            if type == "run":
+                garmin_step["stepType"] = {
+                    "stepTypeId": 3,
+                    "stepTypeKey": "interval"
+                }
+            elif type == "recovery":
+                garmin_step["stepType"] = {
+                    "stepTypeId": 4,
+                    "stepTypeKey": "recovery"
+                }
+
+            if "lap_button" in own_step:
+                garmin_step["endCondition"] = {
+                    "conditionTypeId": 1,
+                    "conditionTypeKey": "lap.button"
+                }
+            elif "distance" in own_step:
+                garmin_step["endCondition"] = {
+                    "conditionTypeId": 3,
+                    "conditionTypeKey": "distance"
+                }
+                distance = own_step["distance"]
+                garmin_step["endConditionValue"] = float(distance)
+                garmin_step["preferredEndConditionUnit"] = {
+                    "unitId": 2,
+                    "unitKey": "kilometer",
+                    "factor": 100000.0
+                }
+
+                if "pace_from" in own_step and "pace_to" not in own_step:
+                    raise OwnFormatDataObjectError("pace_to", own_step)
+                if "pace_from" not in own_step and "pace_to" in own_step:
+                    raise OwnFormatDataObjectError("pace_from", own_step)
+
+                if "pace_from" in own_step and "pace_to" in own_step:
+                    pace_from = own_step["pace_from"]
+                    pace_to = own_step["pace_to"]
+                    mps_from = pace_string_to_mps(pace_from)
+                    mps_to = pace_string_to_mps(pace_to)
+
+                    garmin_step["targetType"] = {
+                        "workoutTargetTypeId": 6,
+                        "workoutTargetTypeKey": "pace.zone",
+                    }
+                    garmin_step["targetValueOne"] = mps_from
+                    garmin_step["targetValueTwo"] = mps_to
+        else:
+            raise OwnFormatDataObjectNotImplementedError("type",
+                                                         type,
+                                                         own_step)
+
+        return garmin_step
