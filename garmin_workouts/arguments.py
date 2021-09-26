@@ -1,10 +1,6 @@
 import argparse
 import logging
 
-from create import Create
-from login import Login
-from export import Export
-# from import_workouts import Import
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +10,11 @@ class CLI:
         self.parser = argparse.ArgumentParser(prog='garmin-workouts',
                                               add_help=False)
 
+    def print_help(self):
+        self.parser.print_help()
+
     def init_parser(self):
+        # type: (None) -> argparse.ArgumentParser
         # Basic options
         options = self.parser.add_argument_group('Options')
         options.add_argument(
@@ -97,28 +97,4 @@ class CLI:
             '-f', '--file', type=str, help='Path to the file containing '
             'workouts definition', dest='import_file')
 
-        args = self.parser.parse_args()
-
-        if args.verbose:
-            logging.getLogger().setLevel(logging.DEBUG)
-
-        if args.help:
-            self.parser.print_help()
-            exit(0)
-
-        if args.command == 'login':
-            login = Login(args)
-            login.login()
-        elif args.command == 'logout':
-            login = Login()
-            login.logout()
-        elif args.command == 'export':
-            export = Export(args)
-            export.export()
-        elif args.command == 'import':
-            import_workouts = Import()
-            import_workouts.import_workouts()
-        elif args.command == 'create':
-            Create(args)
-        else:
-            self.parser.print_help()
+        return self.parser.parse_args()

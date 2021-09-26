@@ -1,8 +1,13 @@
 import logging
 import json
 import time
+import yaml
+
+from typing import List
 
 from login import Login
+from libs.parser import WorkoutParser
+
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +34,8 @@ class Export():
                 extension = 'json'
             self.filename = f'workouts_{timestamp}.{extension}'
 
+        self.export()
+
     def export(self):
         if self.export_type == 'json':
             self.export_json()
@@ -37,9 +44,10 @@ class Export():
         elif self.export_type == 'yml':
             self.export_yml()
         else:
-            raise NotImplementedError
+            self.export_one_workout_to_yml()
+            # raise NotImplementedError
 
-    def download_workouts(self):
+    def get_workouts_info(self):
         workouts_url = "https://connect.garmin.com/proxy/workout-service/workouts"
         workouts_params = {
             "start": 1,
@@ -60,15 +68,55 @@ class Export():
     def export_json(self):
         print(123)
 
+    def get_workouts_ids(self) -> List[int]:
+        response_json = self.get_workouts_info()
+        # log.debug(print(json.dumps(response_json, indent=2)))
+        ids = []
+
+        for workout in response_json:
+            if workout and "workoutId" in workout:
+                ids.append(workout["workoutId"])
+        return ids
+
+    def get_workout(self, workout_id):
+        base_url = "https://connect.garmin.com/proxy/workout-service/workout"
+        workout_url = f'{base_url}/{workout_id}'
+        workout_response = self.session.get(workout_url)
+
+        return json.loads(workout_response.text)
+
     def export_raw(self):
-        response_jsons = self.download_workouts()
+        workouts_id = self.get_workouts_ids()
+
+        print(workouts_id)
+        workouts = []
+        for wid in workouts_id:
+            workouts.append(self.get_workout(wid))
 
         if self.stdout:
-            print(json.dumps(response_jsons, indent=2))
+            print(json.dumps(workouts, indent=2))
         else:
             with open(self.filename, 'w') as outfile:
                 log.info('Storing workouts to the %s' % self.filename)
-                json.dump(response_jsons, outfile, indent=2)
+                json.dump(workouts, outfile, indent=2)
 
     def export_yml(self):
         raise NotImplementedError
+
+    def export_one_workout_to_yml(self):
+        self.limit = 1
+        workout_id = self.get_workouts_ids()[0]
+
+        workout = self.get_workout(workout_id)
+
+        try:
+            workout_parser = WorkoutParser(garmin_format=workout)
+            workout_instance = workout_parser.get_own_format()
+        except Exception as err:
+            print("Problem with parsing")
+            print(json.dumps(workout, indent=2))
+            print(workout)
+            raise err
+
+        # print(workout_instance)
+        print(yaml.dump(workout_instance, default_flow_style=False))
