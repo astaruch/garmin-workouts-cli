@@ -26,18 +26,20 @@ def main():
 
     if args.command == 'login':
         login = Login(args)
-        login.login()
     elif args.command == 'logout':
         login = Login()
         login.logout()
-    elif args.command == 'export':
-        Export(args)
-    elif args.command == 'import':
-        Import(args)
-    elif args.command == 'create':
-        Create(args)
     else:
-        cli.print_help()
+        login = Login(args)
+        session = login.get_session()
+        if args.command == 'export':
+            Export(args, session)
+        elif args.command == 'import':
+            Import(args, session)
+        elif args.command == 'create':
+            Create(args, session)
+        else:
+            cli.print_help()
 
 
 if __name__ == "__main__":

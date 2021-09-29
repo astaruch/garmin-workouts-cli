@@ -5,19 +5,20 @@ import yaml
 
 from typing import List
 
-from login import Login
 from libs.parser import WorkoutParser
-
+from libs.garmin_api_client import GarminApiClient
 
 log = logging.getLogger(__name__)
 
 
 class Export():
-    def __init__(self, args):
+    def __init__(self, args, session):
         self.export_type = args.export_type if args.export_type else 'yaml'
-        login = Login()
-        login.login()
-        self.session = login.get_session()
+        self._parse_args(args)
+        self.api_client = GarminApiClient(session=session)
+        self.export()
+
+    def _parse_args(self, args):
         if args.export_sort == 'asc':
             self.order_seq = 'ASC'
         else:
@@ -34,8 +35,6 @@ class Export():
                 extension = 'json'
             self.filename = f'workouts_{timestamp}.{extension}'
 
-        self.export()
-
     def export(self):
         if self.export_type == 'json':
             self.export_json()
@@ -47,29 +46,11 @@ class Export():
             self.export_one_workout_to_yml()
             # raise NotImplementedError
 
-    def get_workouts_info(self):
-        workouts_url = "https://connect.garmin.com/proxy/workout-service/workouts"
-        workouts_params = {
-            "start": 1,
-            "limit": self.limit,
-            "myWorkoutsOnly": True,
-            "sharedWorkoutsOnly": False,
-            "orderBy": "WORKOUT_NAME",
-            "orderSeq": self.order_seq,
-            "includeAtp": False,
-        }
-        workouts_response = self.session.get(
-            url=workouts_url,
-            params=workouts_params)
-        workouts_response.raise_for_status()
-
-        return json.loads(workouts_response.text)
-
     def export_json(self):
         print(123)
 
     def get_workouts_ids(self) -> List[int]:
-        response_json = self.get_workouts_info()
+        response_json = self.api_client.get_workouts_info(self.limit, self.order_seq)
         # log.debug(print(json.dumps(response_json, indent=2)))
         ids = []
 
@@ -78,20 +59,13 @@ class Export():
                 ids.append(workout["workoutId"])
         return ids
 
-    def get_workout(self, workout_id):
-        base_url = "https://connect.garmin.com/proxy/workout-service/workout"
-        workout_url = f'{base_url}/{workout_id}'
-        workout_response = self.session.get(workout_url)
-
-        return json.loads(workout_response.text)
-
     def export_raw(self):
         workouts_id = self.get_workouts_ids()
 
         print(workouts_id)
         workouts = []
         for wid in workouts_id:
-            workouts.append(self.get_workout(wid))
+            workouts.append(self.api_client.get_workout_details(wid))
 
         if self.stdout:
             print(json.dumps(workouts, indent=2))
@@ -107,7 +81,7 @@ class Export():
         self.limit = 1
         workout_id = self.get_workouts_ids()[0]
 
-        workout = self.get_workout(workout_id)
+        workout = self.api_client.get_workout_details(workout_id)
 
         try:
             workout_parser = WorkoutParser(garmin_format=workout)
