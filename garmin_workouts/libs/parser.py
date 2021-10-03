@@ -184,54 +184,58 @@ class WorkoutParser():
             if "targetType" not in garmin_step:
                 raise GarminConnectObjectError("targetType", garmin_step)
 
-            if "workoutTargetTypeKey" not in garmin_step["targetType"]:
-                raise GarminConnectObjectError("workoutTargetTypeKey", garmin_step)
-
-            target_type = garmin_step["targetType"]["workoutTargetTypeKey"]
-            if target_type == "pace.zone":
-                if "targetValueOne" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueOne",
-                                                   garmin_step)
-                if "targetValueTwo" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueTwo",
-                                                   garmin_step)
-
-                pace_from = mps_to_pace_string(garmin_step["targetValueOne"])
-                pace_to = mps_to_pace_string(garmin_step["targetValueTwo"])
-
-                own_step["pace_from"] = pace_from
-                own_step["pace_to"] = pace_to
-            elif target_type == "heart.rate.zone":
-                hr_zone = garmin_step["zoneNumber"]
-                own_step["hr_zone"] = hr_zone
-            elif target_type == "speed.zone":
-                if "targetValueOne" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueOne",
-                                                   garmin_step)
-                if "targetValueTwo" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueTwo",
-                                                   garmin_step)
-                speed_from = mps_to_kmh_string(garmin_step["targetValueOne"])
-                speed_to = mps_to_kmh_string(garmin_step["targetValueTwo"])
-
-                own_step["pace_from"] = speed_from
-                own_step["pace_to"] = speed_to
-            elif target_type == "cadence":
-                if "targetValueOne" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueOne",
-                                                   garmin_step)
-                if "targetValueTwo" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueTwo",
-                                                   garmin_step)
-
-                own_step["cadence_from"] = garmin_step["targetValueOne"]
-                own_step["cadence_to"] = garmin_step["targetValueTwo"]
-            elif target_type == "no.target":
+            if not garmin_step["targetType"]:
+                # we don't nede to have target type. bare step
                 pass
             else:
-                raise GarminConnectNotImplementedError("workoutTargetTypeKey",
-                                                       target_type,
-                                                       garmin_step)
+                if "workoutTargetTypeKey" not in garmin_step["targetType"]:
+                    raise GarminConnectObjectError("workoutTargetTypeKey", garmin_step)
+
+                target_type = garmin_step["targetType"]["workoutTargetTypeKey"]
+                if target_type == "pace.zone":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+
+                    pace_from = mps_to_pace_string(garmin_step["targetValueOne"])
+                    pace_to = mps_to_pace_string(garmin_step["targetValueTwo"])
+
+                    own_step["pace_from"] = pace_from
+                    own_step["pace_to"] = pace_to
+                elif target_type == "heart.rate.zone":
+                    hr_zone = garmin_step["zoneNumber"]
+                    own_step["hr_zone"] = hr_zone
+                elif target_type == "speed.zone":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+                    speed_from = mps_to_kmh_string(garmin_step["targetValueOne"])
+                    speed_to = mps_to_kmh_string(garmin_step["targetValueTwo"])
+
+                    own_step["pace_from"] = speed_from
+                    own_step["pace_to"] = speed_to
+                elif target_type == "cadence":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+
+                    own_step["cadence_from"] = garmin_step["targetValueOne"]
+                    own_step["cadence_to"] = garmin_step["targetValueTwo"]
+                elif target_type == "no.target":
+                    pass
+                else:
+                    raise GarminConnectNotImplementedError("workoutTargetTypeKey",
+                                                        target_type,
+                                                        garmin_step)
         else:
             raise GarminConnectNotImplementedError("type",
                                                    type,
