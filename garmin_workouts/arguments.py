@@ -46,31 +46,6 @@ class CLI:
         subparsers.add_parser(
             'logout', help='Log out from the Garmin Connect')
 
-        create_parser = subparsers.add_parser(
-            'create', help='Create a new workout from the command line',
-        )
-
-        create_parser.add_argument(
-            '--sample-workout', help='Create and upload a sample workout',
-            action='store_true', dest='sample_workout'
-        )
-
-        create_parser.add_argument(
-            '-k', '--keep-json', help='Keep the JSON file which is created '
-            'for the request', action='store_true', dest='keep_json'
-        )
-
-        create_parser.add_argument(
-            '-x', '--no-upload', help="Don't upload the workout to the "
-            " Garmin Connect", action='store_true', dest='no_upload'
-        )
-
-        create_parser.add_argument(
-            '-n', '--name', help='Name of the new workout. If ommited, '
-            'name "Workout <hash>" would be used. E.g. "Workout e3f1"',
-            dest='workout_name'
-        )
-
         export_parser = subparsers.add_parser(
             'export', help='Export workouts from the Garmin Connect to the '
             'file')
