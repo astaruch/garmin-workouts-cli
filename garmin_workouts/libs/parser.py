@@ -144,6 +144,8 @@ class WorkoutParser():
                 own_step["type"] = "recovery"
             elif step_type == "rest":
                 own_step["type"] = "rest"
+            elif step_type == "other":
+                own_step["type"] = "other"
             else:
                 raise GarminConnectNotImplementedError("stepTypeKey",
                                                        step_type,
