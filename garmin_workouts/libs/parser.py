@@ -24,10 +24,12 @@ class WorkoutParser():
 
     def __init__(self,
                  garmin_format=None,
-                 own_format=None):
+                 own_format=None,
+                 append_to_log=None):
         # type: (dict, dict) -> None
         self._garmin_format = garmin_format
         self._own_format = own_format
+        self._append_to_log = append_to_log
         self.parse()
 
     def get_garmin_format(self):
@@ -60,7 +62,11 @@ class WorkoutParser():
         Parses the Garmin Connect API object and return dictionary in
         our own format.
         """
-        log.info("Parsing Garmin Connect API object..")
+        if self._append_to_log:
+            log.info(f"Parsing Garmin Connect API object.. {self._append_to_log}")
+        else:
+            log.info("Parsing Garmin Connect API object..")
+
         own = {}
 
         if "workoutName" not in garmin:

@@ -51,12 +51,18 @@ class Export():
         }
         workouts = []
 
+        count = 1
+
         if self._from_garmin_workouts_file:
             with open(self._from_garmin_workouts_file, 'r') as infile:
                 garmin_workouts = json.load(infile)
+                total_count = len(garmin_workouts)
                 for garmin_workout in garmin_workouts:
                     try:
-                        workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                        count_str = f"({count}/{total_count})"
+                        count += 1
+                        workout_parser = WorkoutParser(garmin_format=garmin_workout,
+                                                       append_to_log=count_str)
                     except GarminConnectNotImplementedError as err:
                         to_export["error"] = "parsing error"
                         to_export["workouts"] = workouts
