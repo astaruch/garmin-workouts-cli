@@ -88,6 +88,10 @@ class CLI:
             '. Leave the argument and program will generate a one.',
             nargs='?', const='', dest='export_file', metavar='FILENAME'
         )
+        export_parser.add_argument(
+            '--stdout', help="Print workouts to STDOUT instead of file.",
+            action='store_true', dest='export_stdout'
+        )
         import_parser = subparsers.add_parser(
             'import', help='Import workouts to the Garmin Connect from a file')
         import_parser.add_argument(

@@ -23,7 +23,7 @@ class Export():
         else:
             self.order_seq = 'DESC'
         self.limit = args.export_limit if 'export_limit' in args else 999
-        self.stdout = not args.export_file and args.export_file != ''
+        self.stdout = args.export_stdout
         if args.export_file != '':
             self.filename = args.export_file
         else:
@@ -31,11 +31,7 @@ class Export():
             self.filename = f'workouts_{timestamp}.yml'
 
     def export(self):
-        if self.export_type == 'yml':
-            self.export_yml()
-        else:
-            self.export_one_workout_to_yml()
-            # raise NotImplementedError
+        self.export_one_workout_to_yml()
 
     def get_workouts_ids(self) -> List[int]:
         response_json = self.api_client.get_workouts_info(self.limit, self.order_seq)
