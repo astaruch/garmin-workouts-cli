@@ -74,9 +74,13 @@ class Export():
                         raise err
                     log.info(f'Skipping {err.value} workout for now...')
 
+        to_export = {
+            "version": 1,
+            "workouts": workouts
+        }
         if self.stdout:
-            print(yaml.dump(workouts, default_flow_style=False))
+            print(yaml.dump(to_export, default_flow_style=False))
         else:
             with open(self.filename, 'w') as outfile:
                 log.info('Storing workouts to the %s' % self.filename)
-                yaml.dump(workouts, outfile, indent=2)
+                yaml.dump(to_export, outfile)
