@@ -33,6 +33,10 @@ class WorkoutParser():
     def get_own_format(self):
         return self._own_format
 
+    def get_workout_name(self):
+        assert self._own_format
+        return self._own_format["name"]
+
     def parse(self):
         # type: (None) -> None
         """

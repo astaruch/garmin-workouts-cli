@@ -5,11 +5,15 @@ from login import Login
 
 from workouts.workout import Workout
 
+from libs.garmin_api_client import GarminApiClient
+
 log = logging.getLogger(__name__)
 
 
 class Create:
-    def __init__(self, args):
+    def __init__(self, args, session):
+        self.api_client = GarminApiClient(session=session)
+
         if 'workout_name' in args and args.workout_name:
             self.name = args.workout_name
         else:
@@ -21,10 +25,6 @@ class Create:
         self.keep = args.keep_json
 
         self.dont_upload = args.no_upload
-        if not self.dont_upload:
-            login_module = Login()
-            login_module.login()
-            self.session = login_module.get_session()
 
         if args.sample_workout:
             self.create_sample_workout()
@@ -39,24 +39,7 @@ class Create:
                 outfile.write(workout.toJSON())
 
         if not self.dont_upload:
-            assert self.session
-
-            log.info(f"Uploading a new workout '{self.name}' to the Garmin Connect")
-            headers = {
-                "Accept": "application/json, text/javascript, */*; q=0.01",
-                "Accept-Language": "en-US,en;q=0.5",
-                "NK": "NT",
-                "Referer": "https://connect.garmin.com/modern/workouts",
-                "Content-Type": "application/json",
-            }
-            response = self.session.post(
-                "https://connect.garmin.com/modern/proxy/workout-service/workout",
-                headers=headers, data=workout.toJSON(None))
-            response.raise_for_status()
-
-            response_json = response.json()
-            new_workout_url = f"https://connect.garmin.com/modern/workout/{response_json['workoutId']}"
-            log.info(f'New workout created: {new_workout_url}')
+            response_json = self.api_client.upload_new_workout(workout.toJSON(indent=None), self.name)
 
             if self.keep:
                 with open(self.response_filename, 'w') as outfile:
