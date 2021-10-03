@@ -313,3 +313,37 @@ class WorkoutParser():
                                                          own_step)
 
         return garmin_step
+
+
+class WorkoutsInfoParser():
+    """
+    Object to parse Garmin Connect API info about workout, not the
+    workout itself.
+    """
+    def __init__(self, workout_info):
+        self._workout_info = workout_info
+        self._own_info = {}
+        self._parse()
+
+    def _parse(self):
+        log.debug("Parsing Garmin workout info...")
+        if "workoutId" not in self._workout_info:
+            raise GarminConnectObjectError("workoutId", self._workout_info)
+        if "sportType" not in self._workout_info:
+            raise GarminConnectObjectError("sportType", self._workout_info)
+
+        self._own_info["id"] = self._workout_info["workoutId"]
+
+        sport_type = self._workout_info["sportType"]["sportTypeKey"]
+        if sport_type == "running":
+            self._own_info["type"] = "running"
+        else:
+            raise GarminConnectNotImplementedError("sportType.sportTypeKey",
+                                                   sport_type,
+                                                   self._workout_info)
+
+    def is_run(self):
+        return self._own_info["type"] == "running"
+
+    def get_id(self):
+        return self._own_info["id"]

@@ -75,6 +75,10 @@ class CLI:
             'export', help='Export workouts from the Garmin Connect to the '
             'file')
         export_parser.add_argument(
+            '--runs', help="Export runs",
+            dest='export_runs', action='store_true'
+        )
+        export_parser.add_argument(
             '--sort', type=str, choices=['asc', 'desc'],
             dest='export_sort', help="Default: asc",
             default='asc'
