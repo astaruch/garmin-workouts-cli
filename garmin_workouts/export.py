@@ -46,13 +46,23 @@ class Export():
                 self.filename = args.export_file
 
     def _export(self):
+        to_export = {
+            "version": 1
+        }
         workouts = []
 
         if self._from_garmin_workouts_file:
             with open(self._from_garmin_workouts_file, 'r') as infile:
                 garmin_workouts = json.load(infile)
                 for garmin_workout in garmin_workouts:
-                    workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                    try:
+                        workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                    except GarminConnectNotImplementedError as err:
+                        to_export["error"] = "parsing error"
+                        to_export["workouts"] = workouts
+                        self.filename = "failed_workouts.yml"
+                        self._write_to_stream(to_export)
+                        raise err
                     own_format_workout = workout_parser.get_own_format()
                     workouts.append(own_format_workout)
         else:
@@ -74,13 +84,13 @@ class Export():
                         raise err
                     log.info(f'Skipping {err.value} workout for now...')
 
-        to_export = {
-            "version": 1,
-            "workouts": workouts
-        }
+        to_export["workouts"] = workouts
+        self._write_to_stream(to_export)
+
+    def _write_to_stream(self, to_export):
         if self.stdout:
             print(yaml.dump(to_export, default_flow_style=False))
         else:
             with open(self.filename, 'w') as outfile:
-                log.info('Storing workouts to the %s' % self.filename)
+                log.info('Storing workouts to the "%s"' % self.filename)
                 yaml.dump(to_export, outfile)

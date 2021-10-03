@@ -2,7 +2,10 @@
 import logging
 
 
-from libs.conversions import mps_to_pace_string, pace_string_to_mps
+from libs.conversions import \
+    mps_to_pace_string, \
+    pace_string_to_mps, \
+    seconds_to_time_string
 from libs.exception import \
     GarminConnectObjectError, \
     GarminConnectNotImplementedError, \
@@ -146,6 +149,9 @@ class WorkoutParser():
                 own_step["distance"] = distance
             elif duration_type == "lap.button":
                 own_step["lap_button"] = True
+            elif duration_type == "time":
+                seconds = garmin_step["endConditionValue"]
+                own_step["time"] = seconds_to_time_string(seconds)
             else:
                 raise GarminConnectNotImplementedError("conditionTypeKey",
                                                        duration_type,
