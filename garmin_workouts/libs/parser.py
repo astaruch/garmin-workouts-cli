@@ -163,6 +163,8 @@ class WorkoutParser():
             elif duration_type == "time":
                 seconds = garmin_step["endConditionValue"]
                 own_step["time"] = seconds_to_time_string(seconds)
+            elif duration_type == "calories":
+                own_step["calories"] = garmin_step["endConditionValue"]
             else:
                 raise GarminConnectNotImplementedError("conditionTypeKey",
                                                        duration_type,
