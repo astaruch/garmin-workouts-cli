@@ -1,6 +1,7 @@
 import logging
 import time
 import yaml
+import json
 
 from libs.parser import WorkoutParser, WorkoutsInfoParser
 from libs.garmin_api_client import GarminApiClient
@@ -18,6 +19,10 @@ class Export():
 
     def _parse_args(self, args):
         self._export_runs = args.export_runs
+        if args.export_garmin_workouts_file:
+            self._from_garmin_workouts_file = args.export_garmin_workouts_file
+        else:
+            self._from_garmin_workouts_file = None
 
         # TODO: Add comparision in future for bikes and swimming, so it will
         #       emulate --all option
@@ -41,26 +46,33 @@ class Export():
                 self.filename = args.export_file
 
     def _export(self):
-        garmin_workouts_info = self.api_client.\
-            get_workouts_info(self.limit, self.order_seq)
-
         workouts = []
 
-        for garmin_workout_info in garmin_workouts_info:
-            try:
-                workout_info = WorkoutsInfoParser(garmin_workout_info)
-                if self._export_runs and workout_info.is_run():
-                    garmin_workout = self.api_client.get_workout_details(
-                        workout_info.get_id())
-
+        if self._from_garmin_workouts_file:
+            with open(self._from_garmin_workouts_file, 'r') as infile:
+                garmin_workouts = json.load(infile)
+                for garmin_workout in garmin_workouts:
                     workout_parser = WorkoutParser(garmin_format=garmin_workout)
                     own_format_workout = workout_parser.get_own_format()
                     workouts.append(own_format_workout)
-            except GarminConnectNotImplementedError as err:
-                if err.property != "sportType.sportTypeKey":
-                    # NOTE: Raise only different sports
-                    raise err
-                log.info(f'Skipping {err.value} workout for now...')
+        else:
+            garmin_workouts_info = self.api_client.\
+                get_workouts_info(self.limit, self.order_seq)
+            for garmin_workout_info in garmin_workouts_info:
+                try:
+                    workout_info = WorkoutsInfoParser(garmin_workout_info)
+                    if self._export_runs and workout_info.is_run():
+                        garmin_workout = self.api_client.get_workout_details(
+                            workout_info.get_id())
+
+                        workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                        own_format_workout = workout_parser.get_own_format()
+                        workouts.append(own_format_workout)
+                except GarminConnectNotImplementedError as err:
+                    if err.property != "sportType.sportTypeKey":
+                        # NOTE: Raise only different sports
+                        raise err
+                    log.info(f'Skipping {err.value} workout for now...')
 
         if self.stdout:
             print(yaml.dump(workouts, default_flow_style=False))

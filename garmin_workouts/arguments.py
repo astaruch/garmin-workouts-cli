@@ -96,6 +96,11 @@ class CLI:
             '--stdout', help="Print workouts to STDOUT instead of file.",
             action='store_true', dest='export_stdout'
         )
+        export_parser.add_argument(
+            '--from-garmin-workouts-file', type=str, help='Instead of export '
+            ' from Garmin Connect, load workouts from given file.',
+            dest='export_garmin_workouts_file'
+        )
         import_parser = subparsers.add_parser(
             'import', help='Import workouts to the Garmin Connect from a file')
         import_parser.add_argument(
