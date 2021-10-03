@@ -198,6 +198,16 @@ class WorkoutParser():
 
                 own_step["pace_from"] = speed_from
                 own_step["pace_to"] = speed_to
+            elif target_type == "cadence":
+                if "targetValueOne" not in garmin_step:
+                    raise GarminConnectObjectError("targetValueOne",
+                                                   garmin_step)
+                if "targetValueTwo" not in garmin_step:
+                    raise GarminConnectObjectError("targetValueTwo",
+                                                   garmin_step)
+
+                own_step["cadence_from"] = garmin_step["targetValueOne"]
+                own_step["cadence_to"] = garmin_step["targetValueTwo"]
             elif target_type == "no.target":
                 pass
             else:
