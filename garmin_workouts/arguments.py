@@ -75,9 +75,6 @@ class CLI:
             'export', help='Export workouts from the Garmin Connect to the '
             'file')
         export_parser.add_argument(
-            '--type', type=str, choices=['json', 'yml', 'raw'],
-            dest='export_type')
-        export_parser.add_argument(
             '--sort', type=str, choices=['asc', 'desc'],
             dest='export_sort', help="Default: asc",
             default='asc'

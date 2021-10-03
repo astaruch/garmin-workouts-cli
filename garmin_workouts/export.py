@@ -13,7 +13,6 @@ log = logging.getLogger(__name__)
 
 class Export():
     def __init__(self, args, session):
-        self.export_type = args.export_type if args.export_type else 'yaml'
         self._parse_args(args)
         self.api_client = GarminApiClient(session=session)
         self.export()
@@ -29,25 +28,14 @@ class Export():
             self.filename = args.export_file
         else:
             timestamp = time.strftime("%Y%m%d-%H%M%S")
-            if self.export_type == 'yml':
-                extension = 'yml'
-            else:
-                extension = 'json'
-            self.filename = f'workouts_{timestamp}.{extension}'
+            self.filename = f'workouts_{timestamp}.yml'
 
     def export(self):
-        if self.export_type == 'json':
-            self.export_json()
-        elif self.export_type == 'raw':
-            self.export_raw()
-        elif self.export_type == 'yml':
+        if self.export_type == 'yml':
             self.export_yml()
         else:
             self.export_one_workout_to_yml()
             # raise NotImplementedError
-
-    def export_json(self):
-        print(123)
 
     def get_workouts_ids(self) -> List[int]:
         response_json = self.api_client.get_workouts_info(self.limit, self.order_seq)
@@ -58,21 +46,6 @@ class Export():
             if workout and "workoutId" in workout:
                 ids.append(workout["workoutId"])
         return ids
-
-    def export_raw(self):
-        workouts_id = self.get_workouts_ids()
-
-        print(workouts_id)
-        workouts = []
-        for wid in workouts_id:
-            workouts.append(self.api_client.get_workout_details(wid))
-
-        if self.stdout:
-            print(json.dumps(workouts, indent=2))
-        else:
-            with open(self.filename, 'w') as outfile:
-                log.info('Storing workouts to the %s' % self.filename)
-                json.dump(workouts, outfile, indent=2)
 
     def export_yml(self):
         raise NotImplementedError
