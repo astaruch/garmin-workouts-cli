@@ -5,7 +5,8 @@ import logging
 from libs.conversions import \
     mps_to_pace_string, \
     pace_string_to_mps, \
-    seconds_to_time_string
+    seconds_to_time_string, \
+    mps_to_kmh_string
 from libs.exception import \
     GarminConnectObjectError, \
     GarminConnectNotImplementedError, \
@@ -185,6 +186,18 @@ class WorkoutParser():
             elif target_type == "heart.rate.zone":
                 hr_zone = garmin_step["zoneNumber"]
                 own_step["hr_zone"] = hr_zone
+            elif target_type == "speed.zone":
+                if "targetValueOne" not in garmin_step:
+                    raise GarminConnectObjectError("targetValueOne",
+                                                   garmin_step)
+                if "targetValueTwo" not in garmin_step:
+                    raise GarminConnectObjectError("targetValueTwo",
+                                                   garmin_step)
+                speed_from = mps_to_kmh_string(garmin_step["targetValueOne"])
+                speed_to = mps_to_kmh_string(garmin_step["targetValueTwo"])
+
+                own_step["pace_from"] = speed_from
+                own_step["pace_to"] = speed_to
             elif target_type == "no.target":
                 pass
             else:

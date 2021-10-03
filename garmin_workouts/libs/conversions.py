@@ -48,6 +48,7 @@ def pace_string_to_mps(pace_string):
 
     return 1000 / (int(minutes) * 60 + int(seconds))
 
+
 def seconds_to_time_string(total_seconds):
     # type: (float) -> str
     """
@@ -65,3 +66,23 @@ def seconds_to_time_string(total_seconds):
         return f"{minutes:02d}:{seconds:02d} minutes"
     else:
         return f"{seconds:02d} seconds"
+
+
+def mps_to_kmh_string(mps):
+    # type: (float) -> str
+    """
+    Convert meters per seconds in float to km per hour string.
+
+    E.g. 6.11111116 -> "22.0 km/h"
+         6.9444444999999995 -> "25.0 km/h"
+
+         1 m/s = x km/h
+         1 m/s = x 1000m/3600s
+         1 m/s = x 10m/36s
+         36/10 = x
+         x = 3.6
+
+    Returns string
+    """
+
+    return f"{mps * 3.6:.1f} km/h"
