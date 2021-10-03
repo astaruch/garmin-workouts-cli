@@ -1,9 +1,6 @@
 import logging
-import json
 import time
 import yaml
-
-from typing import List
 
 from libs.parser import WorkoutParser, WorkoutsInfoParser
 from libs.garmin_api_client import GarminApiClient
@@ -71,34 +68,3 @@ class Export():
             with open(self.filename, 'w') as outfile:
                 log.info('Storing workouts to the %s' % self.filename)
                 yaml.dump(workouts, outfile, indent=2)
-
-    def _get_workouts_ids(self) -> List[int]:
-        response_json = self.api_client.get_workouts_info(self.limit, self.order_seq)
-        # log.debug(print(json.dumps(response_json, indent=2)))
-        ids = []
-
-        for workout in response_json:
-            if workout and "workoutId" in workout:
-                ids.append(workout["workoutId"])
-        return ids
-
-    def export_yml(self):
-        raise NotImplementedError
-
-    def export_one_workout_to_yml(self):
-        self.limit = 1
-        workout_id = self._get_workouts_ids()[0]
-
-        workout = self.api_client.get_workout_details(workout_id)
-
-        try:
-            workout_parser = WorkoutParser(garmin_format=workout)
-            workout_instance = workout_parser.get_own_format()
-        except Exception as err:
-            print("Problem with parsing")
-            print(json.dumps(workout, indent=2))
-            print(workout)
-            raise err
-
-        # print(workout_instance)
-        print(yaml.dump(workout_instance, default_flow_style=False))
