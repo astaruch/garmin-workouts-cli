@@ -131,3 +131,4 @@ dmypy.json
 # Custom things
 config.ini
 workouts_*.json
+workouts_*.yml

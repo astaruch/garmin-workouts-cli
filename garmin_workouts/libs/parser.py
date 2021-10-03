@@ -2,7 +2,11 @@
 import logging
 
 
-from libs.conversions import mps_to_pace_string, pace_string_to_mps
+from libs.conversions import \
+    mps_to_pace_string, \
+    pace_string_to_mps, \
+    seconds_to_time_string, \
+    mps_to_kmh_string
 from libs.exception import \
     GarminConnectObjectError, \
     GarminConnectNotImplementedError, \
@@ -21,10 +25,12 @@ class WorkoutParser():
 
     def __init__(self,
                  garmin_format=None,
-                 own_format=None):
+                 own_format=None,
+                 append_to_log=None):
         # type: (dict, dict) -> None
         self._garmin_format = garmin_format
         self._own_format = own_format
+        self._append_to_log = append_to_log
         self.parse()
 
     def get_garmin_format(self):
@@ -57,7 +63,11 @@ class WorkoutParser():
         Parses the Garmin Connect API object and return dictionary in
         our own format.
         """
-        log.info("Parsing Garmin Connect API object..")
+        if self._append_to_log:
+            log.info(f"Parsing Garmin Connect API object.. {self._append_to_log}")
+        else:
+            log.info("Parsing Garmin Connect API object..")
+
         own = {}
 
         if "workoutName" not in garmin:
@@ -124,10 +134,18 @@ class WorkoutParser():
                 raise GarminConnectObjectError("stepType", garmin_step)
 
             step_type = garmin_step["stepType"]["stepTypeKey"]
-            if step_type == "interval":
+            if step_type == "warmup":
+                own_step["type"] = "warmup"
+            elif step_type == "cooldown":
+                own_step["type"] = "cooldown"
+            elif step_type == "interval":
                 own_step["type"] = "run"
             elif step_type == "recovery":
                 own_step["type"] = "recovery"
+            elif step_type == "rest":
+                own_step["type"] = "rest"
+            elif step_type == "other":
+                own_step["type"] = "other"
             else:
                 raise GarminConnectNotImplementedError("stepTypeKey",
                                                        step_type,
@@ -142,6 +160,22 @@ class WorkoutParser():
                 own_step["distance"] = distance
             elif duration_type == "lap.button":
                 own_step["lap_button"] = True
+            elif duration_type == "time":
+                seconds = garmin_step["endConditionValue"]
+                own_step["time"] = seconds_to_time_string(seconds)
+            elif duration_type == "calories":
+                own_step["calories"] = garmin_step["endConditionValue"]
+            elif duration_type == "heart.rate":
+                hr = garmin_step["endConditionValue"]
+                hr_compare = garmin_step["endConditionCompare"]
+                if hr_compare == "lt":
+                    own_step["hr_below"] = hr
+                elif hr_compare == "gt":
+                    own_step["hr_above"] = hr
+                else:
+                    raise GarminConnectNotImplementedError("endConditionCompare",
+                                                           hr_compare,
+                                                           garmin_step)
             else:
                 raise GarminConnectNotImplementedError("conditionTypeKey",
                                                        duration_type,
@@ -150,26 +184,58 @@ class WorkoutParser():
             if "targetType" not in garmin_step:
                 raise GarminConnectObjectError("targetType", garmin_step)
 
-            target_type = garmin_step["targetType"]["workoutTargetTypeKey"]
-            if target_type == "pace.zone":
-                if "targetValueOne" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueOne",
-                                                   garmin_step)
-                if "targetValueTwo" not in garmin_step:
-                    raise GarminConnectObjectError("targetValueTwo",
-                                                   garmin_step)
-
-                pace_from = mps_to_pace_string(garmin_step["targetValueOne"])
-                pace_to = mps_to_pace_string(garmin_step["targetValueTwo"])
-
-                own_step["pace_from"] = pace_from
-                own_step["pace_to"] = pace_to
-            elif target_type == "no.target":
+            if not garmin_step["targetType"]:
+                # we don't nede to have target type. bare step
                 pass
             else:
-                raise GarminConnectNotImplementedError("workoutTargetTypeKey",
-                                                       target_type,
-                                                       garmin_step)
+                if "workoutTargetTypeKey" not in garmin_step["targetType"]:
+                    raise GarminConnectObjectError("workoutTargetTypeKey", garmin_step)
+
+                target_type = garmin_step["targetType"]["workoutTargetTypeKey"]
+                if target_type == "pace.zone":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+
+                    pace_from = mps_to_pace_string(garmin_step["targetValueOne"])
+                    pace_to = mps_to_pace_string(garmin_step["targetValueTwo"])
+
+                    own_step["pace_from"] = pace_from
+                    own_step["pace_to"] = pace_to
+                elif target_type == "heart.rate.zone":
+                    hr_zone = garmin_step["zoneNumber"]
+                    own_step["hr_zone"] = hr_zone
+                elif target_type == "speed.zone":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+                    speed_from = mps_to_kmh_string(garmin_step["targetValueOne"])
+                    speed_to = mps_to_kmh_string(garmin_step["targetValueTwo"])
+
+                    own_step["pace_from"] = speed_from
+                    own_step["pace_to"] = speed_to
+                elif target_type == "cadence":
+                    if "targetValueOne" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueOne",
+                                                    garmin_step)
+                    if "targetValueTwo" not in garmin_step:
+                        raise GarminConnectObjectError("targetValueTwo",
+                                                    garmin_step)
+
+                    own_step["cadence_from"] = garmin_step["targetValueOne"]
+                    own_step["cadence_to"] = garmin_step["targetValueTwo"]
+                elif target_type == "no.target":
+                    pass
+                else:
+                    raise GarminConnectNotImplementedError("workoutTargetTypeKey",
+                                                        target_type,
+                                                        garmin_step)
         else:
             raise GarminConnectNotImplementedError("type",
                                                    type,
@@ -313,3 +379,37 @@ class WorkoutParser():
                                                          own_step)
 
         return garmin_step
+
+
+class WorkoutsInfoParser():
+    """
+    Object to parse Garmin Connect API info about workout, not the
+    workout itself.
+    """
+    def __init__(self, workout_info):
+        self._workout_info = workout_info
+        self._own_info = {}
+        self._parse()
+
+    def _parse(self):
+        log.debug("Parsing Garmin workout info...")
+        if "workoutId" not in self._workout_info:
+            raise GarminConnectObjectError("workoutId", self._workout_info)
+        if "sportType" not in self._workout_info:
+            raise GarminConnectObjectError("sportType", self._workout_info)
+
+        self._own_info["id"] = self._workout_info["workoutId"]
+
+        sport_type = self._workout_info["sportType"]["sportTypeKey"]
+        if sport_type == "running":
+            self._own_info["type"] = "running"
+        else:
+            raise GarminConnectNotImplementedError("sportType.sportTypeKey",
+                                                   sport_type,
+                                                   self._workout_info)
+
+    def is_run(self):
+        return self._own_info["type"] == "running"
+
+    def get_id(self):
+        return self._own_info["id"]

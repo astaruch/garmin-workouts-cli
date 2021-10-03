@@ -5,7 +5,6 @@ import sys
 
 from arguments import CLI
 
-from create import Create
 from login import Login
 from export import Export
 from import_workouts import Import
@@ -36,8 +35,6 @@ def main():
             Export(args, session)
         elif args.command == 'import':
             Import(args, session)
-        elif args.command == 'create':
-            Create(args, session)
         else:
             cli.print_help()
 
