@@ -124,7 +124,11 @@ class WorkoutParser():
                 raise GarminConnectObjectError("stepType", garmin_step)
 
             step_type = garmin_step["stepType"]["stepTypeKey"]
-            if step_type == "interval":
+            if step_type == "warmup":
+                own_step["type"] = "warmup"
+            elif step_type == "cooldown":
+                own_step["type"] = "cooldown"
+            elif step_type == "interval":
                 own_step["type"] = "run"
             elif step_type == "recovery":
                 own_step["type"] = "recovery"
