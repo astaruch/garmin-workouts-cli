@@ -182,6 +182,9 @@ class WorkoutParser():
 
                 own_step["pace_from"] = pace_from
                 own_step["pace_to"] = pace_to
+            elif target_type == "heart.rate.zone":
+                hr_zone = garmin_step["zoneNumber"]
+                own_step["hr_zone"] = hr_zone
             elif target_type == "no.target":
                 pass
             else:
