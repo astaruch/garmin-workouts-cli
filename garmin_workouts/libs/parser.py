@@ -165,6 +165,17 @@ class WorkoutParser():
                 own_step["time"] = seconds_to_time_string(seconds)
             elif duration_type == "calories":
                 own_step["calories"] = garmin_step["endConditionValue"]
+            elif duration_type == "heart.rate":
+                hr = garmin_step["endConditionValue"]
+                hr_compare = garmin_step["endConditionCompare"]
+                if hr_compare == "lt":
+                    own_step["hr_below"] = hr
+                elif hr_compare == "gt":
+                    own_step["hr_above"] = hr
+                else:
+                    raise GarminConnectNotImplementedError("endConditionCompare",
+                                                           hr_compare,
+                                                           garmin_step)
             else:
                 raise GarminConnectNotImplementedError("conditionTypeKey",
                                                        duration_type,
@@ -172,6 +183,9 @@ class WorkoutParser():
 
             if "targetType" not in garmin_step:
                 raise GarminConnectObjectError("targetType", garmin_step)
+
+            if "workoutTargetTypeKey" not in garmin_step["targetType"]:
+                raise GarminConnectObjectError("workoutTargetTypeKey", garmin_step)
 
             target_type = garmin_step["targetType"]["workoutTargetTypeKey"]
             if target_type == "pace.zone":
