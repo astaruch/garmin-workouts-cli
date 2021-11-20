@@ -40,5 +40,28 @@ $ python garmin_workouts/garminworkouts.py login
 Export the first 10 runs:
 
 ```console
-python .\garmin_workouts\garminworkouts.py export --runs --limit 10
+python ./garmin_workouts/garminworkouts.py export --runs --limit 10
+```
+
+Import the workout with a name `workout.yml`:
+
+```yaml
+name: 'W17 - LT 6/13km'
+steps:
+  - type: warmup
+    distance: 4000
+    hr_low: 137
+    hr_high: 156
+  - type: run
+    distance: 6000
+    hr_low: 157
+    hr_high: 174
+  - type: cooldown
+    distance: 3000
+    hr_low: 137
+    hr_high: 156
+```
+
+```console
+python ./garmin_workouts/garminworkouts.py import -f workout.yml
 ```

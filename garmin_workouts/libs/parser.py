@@ -387,6 +387,12 @@ class WorkoutParser():
                     "factor": 100000.0
                 }
 
+                #
+                #
+                # TODO: Set the intensity
+                #
+                #
+
                 if "pace_from" in own_step and "pace_to" not in own_step:
                     raise OwnFormatDataObjectError("pace_to", own_step)
                 if "pace_from" not in own_step and "pace_to" in own_step:
@@ -404,6 +410,7 @@ class WorkoutParser():
                     }
                     garmin_step["targetValueOne"] = mps_from
                     garmin_step["targetValueTwo"] = mps_to
+
         else:
             raise OwnFormatDataObjectNotImplementedError("type",
                                                          type,
