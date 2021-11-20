@@ -21,14 +21,22 @@ class Import():
         workout_parser = WorkoutParser(own_format=workout_obj)
         garmin_workout = workout_parser.get_garmin_format()
         workout_name = workout_parser.get_workout_name()
+        workout_id = workout_parser.get_workout_id()
 
         workout_json = json.dumps(garmin_workout, sort_keys=True, indent=2)
 
-        self.api_client.upload_new_workout(workout_json, workout_name)
+        log.debug(json.dumps(garmin_workout, sort_keys=True, indent=2))
+
+        if workout_id:
+            self.api_client.update_existing_workout(workout_json,
+                                                    workout_name,
+                                                    workout_id)
+        else:
+            self.api_client.upload_new_workout(workout_json, workout_name)
 
     def parse_yaml_file(self, filename):
         with open(filename, 'r') as infile:
             log.info(f'Opening file {filename} for reading')
-            workout_obj = yaml.load(infile)
+            workout_obj = yaml.safe_load(infile)
 
         return workout_obj

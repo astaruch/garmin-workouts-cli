@@ -101,6 +101,23 @@ class GarminApiClient():
         log.info(f'New workout created: {new_workout_url}')
         return response_json
 
+    def update_existing_workout(self, workout_json, workout_name, workout_id):
+        log.info(f"Updating existing workout '{workout_id}' with the name '{workout_name}'")
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "en-US,en;q=0.5",
+            "NK": "NT",
+            "Referer": f"https://connect.garmin.com/modern/workout/edit/{workout_id}",
+            "Content-Type": "application/json",
+            "X-HTTP-Method-Override": "PUT",
+        }
+        response = self.session.post(
+            f"https://connect.garmin.com/modern/proxy/workout-service/workout/{workout_id}",
+            headers=headers, data=workout_json)
+        response.raise_for_status()
+
+        log.info(f'Workout updated: https://connect.garmin.com/modern/workout/{workout_id}')
+
     def _authenticate(self):
         username = self.username
         password = self.password

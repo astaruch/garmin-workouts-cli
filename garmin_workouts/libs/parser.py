@@ -43,6 +43,12 @@ class WorkoutParser():
         assert self._own_format
         return self._own_format["name"]
 
+    def get_workout_id(self):
+        if "id" in self._own_format:
+            return self._own_format["id"]
+        else:
+            return None
+
     def parse(self):
         # type: (None) -> None
         """
