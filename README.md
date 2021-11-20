@@ -27,12 +27,18 @@ $ python garmin_workouts/garminworkouts.py -h
 
 ```ini
 [auth]
-username = username@email.com
-password = secret_password
+username=username@email.com
+password=secret_password
 ```
 
 ## Examples
 
 ```console
 $ python garmin_workouts/garminworkouts.py login
+```
+
+Export the first 10 runs:
+
+```console
+python .\garmin_workouts\garminworkouts.py export --runs --limit 10
 ```

@@ -2,3 +2,4 @@ appdirs==1.4.4
 flake8
 requests==2.25.1
 fake-useragent==0.1.11
+pyyaml==6.0
