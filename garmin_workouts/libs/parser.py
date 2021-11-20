@@ -333,10 +333,21 @@ class WorkoutParser():
                 garmin_substeps.append(garmin_substep)
 
             garmin_step["workoutSteps"] = garmin_substeps
-        elif type == "run" or type == "recovery":
+        elif type == "run" or "recovery" or "warmup" or "cooldown":
             garmin_step["type"] = "ExecutableStepDTO"
 
-            if type == "run":
+            # Set the type of the Garmin run
+            if type == "warmup":
+                garmin_step["stepType"] = {
+                    "stepTypeId": 1,
+                    "stepTypeKey": "warmup"
+                }
+            elif type == "cooldown":
+                garmin_step["stepType"] = {
+                    "stepTypeId": 2,
+                    "stepTypeKey": "cooldown"
+                }
+            elif type == "run":
                 garmin_step["stepType"] = {
                     "stepTypeId": 3,
                     "stepTypeKey": "interval"
@@ -346,7 +357,12 @@ class WorkoutParser():
                     "stepTypeId": 4,
                     "stepTypeKey": "recovery"
                 }
+            else:
+                raise OwnFormatDataObjectNotImplementedError("type",
+                                                             type,
+                                                             own_step)
 
+            # Set the distance/duration
             if "lap_button" in own_step:
                 garmin_step["endCondition"] = {
                     "conditionTypeId": 1,
