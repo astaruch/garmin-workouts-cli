@@ -63,6 +63,10 @@ class CLI:
             help="Limit maximum number of workout",
         )
         export_parser.add_argument(
+            '--workout-id', type=int, dest='export_workout_id',
+            help="Download the specific workout with a given ID",
+        )
+        export_parser.add_argument(
             '-f', '--file', type=str, help='write to a file, instead of STDOUT'
             '. Leave the argument and program will generate a one.',
             nargs='?', const='', dest='export_file', metavar='FILENAME'

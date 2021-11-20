@@ -28,7 +28,7 @@ class Import():
 
     def parse_yaml_file(self, filename):
         with open(filename, 'r') as infile:
-            log.info(f'Openin file {filename} for reading')
+            log.info(f'Opening file {filename} for reading')
             workout_obj = yaml.load(infile)
 
         return workout_obj

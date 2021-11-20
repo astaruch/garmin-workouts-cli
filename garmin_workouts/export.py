@@ -24,6 +24,11 @@ class Export():
         else:
             self._from_garmin_workouts_file = None
 
+        if args.export_workout_id:
+            self._workout_id = args.export_workout_id
+        else:
+            self._workout_id = None
+
         # TODO: Add comparision in future for bikes and swimming, so it will
         #       emulate --all option
         if not self._export_runs:
@@ -72,31 +77,40 @@ class Export():
                     own_format_workout = workout_parser.get_own_format()
                     workouts.append(own_format_workout)
         else:
-            garmin_workouts_info = self.api_client.\
-                get_workouts_info(self.limit, self.order_seq)
-            total_count = len(garmin_workouts_info)
+            # Get a specific workout, if ID was given as argument
+            if self._workout_id:
+                garmin_workout = self.api_client.get_workout_details(
+                    self._workout_id)
+                workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                own_format_workout = workout_parser.get_own_format()
+                workouts.append(own_format_workout)
+            else:
+                # Get all workouts
+                garmin_workouts_info = self.api_client.\
+                    get_workouts_info(self.limit, self.order_seq)
+                total_count = len(garmin_workouts_info)
 
-            for garmin_workout_info in garmin_workouts_info:
-                try:
-                    workout_info = WorkoutsInfoParser(garmin_workout_info)
-                    if self._export_runs and workout_info.is_run():
-                        garmin_workout = self.api_client.get_workout_details(
-                            workout_info.get_id())
+                for garmin_workout_info in garmin_workouts_info:
+                    try:
+                        workout_info = WorkoutsInfoParser(garmin_workout_info)
+                        if self._export_runs and workout_info.is_run():
+                            garmin_workout = self.api_client.get_workout_details(
+                                workout_info.get_id())
 
-                        count_str = f"({count}/{total_count})"
+                            count_str = f"({count}/{total_count})"
+                            count += 1
+                            workout_parser = WorkoutParser(garmin_format=garmin_workout,
+                                                            append_to_log=count_str)
+                            own_format_workout = workout_parser.get_own_format()
+                            workouts.append(own_format_workout)
+                    except GarminConnectNotImplementedError as err:
+                        if err.property != "sportType.sportTypeKey":
+                            # NOTE: Raise only different sports
+                            raise err
+
                         count += 1
-                        workout_parser = WorkoutParser(garmin_format=garmin_workout,
-                                                        append_to_log=count_str)
-                        own_format_workout = workout_parser.get_own_format()
-                        workouts.append(own_format_workout)
-                except GarminConnectNotImplementedError as err:
-                    if err.property != "sportType.sportTypeKey":
-                        # NOTE: Raise only different sports
-                        raise err
-
-                    count += 1
-                    count_str = f"({count}/{total_count})"
-                    log.info(f'Skipping {err.value} workout for now... {count_str}')
+                        count_str = f"({count}/{total_count})"
+                        log.info(f'Skipping {err.value} workout for now... {count_str}')
 
         to_export["workouts"] = workouts
         self._write_to_stream(to_export)
