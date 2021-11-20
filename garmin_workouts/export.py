@@ -81,6 +81,9 @@ class Export():
             if self._workout_id:
                 garmin_workout = self.api_client.get_workout_details(
                     self._workout_id)
+                # INFO: Enable this only when debugging, since it will flood
+                # the stdout with jsons
+                # log.debug(json.dumps(garmin_workout, sort_keys=True, indent=2))
                 workout_parser = WorkoutParser(garmin_format=garmin_workout)
                 own_format_workout = workout_parser.get_own_format()
                 workouts.append(own_format_workout)
