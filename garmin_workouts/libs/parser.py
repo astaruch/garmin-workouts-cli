@@ -206,8 +206,17 @@ class WorkoutParser():
                     own_step["pace_from"] = pace_from
                     own_step["pace_to"] = pace_to
                 elif target_type == "heart.rate.zone":
-                    hr_zone = garmin_step["zoneNumber"]
-                    own_step["hr_zone"] = hr_zone
+                    if ("zoneNumber" in garmin_step and
+                            garmin_step["zoneNumber"] is not None):
+                        # We have a precise zone number
+                        hr_zone = garmin_step["zoneNumber"]
+                        own_step["hr_zone"] = hr_zone
+                    else:
+                        # We have a zone range with the 2 values
+                        hr_low = garmin_step["targetValueOne"]
+                        hr_high = garmin_step["targetValueTwo"]
+                        own_step["hr_low"] = hr_low
+                        own_step["hr_high"] = hr_high
                 elif target_type == "speed.zone":
                     if "targetValueOne" not in garmin_step:
                         raise GarminConnectObjectError("targetValueOne",
