@@ -368,6 +368,7 @@ class WorkoutParser():
                                                              type,
                                                              own_step)
 
+            # TODO: Finsih endCondition: "calories", "iterations", "heart.rate"
             # Set the distance/duration
             if "lap_button" in own_step:
                 garmin_step["endCondition"] = {
@@ -387,12 +388,29 @@ class WorkoutParser():
                     "factor": 100000.0
                 }
 
-                #
-                #
-                # TODO: Set the intensity
-                #
-                #
+            # Set the intensity
+            # TODO: Finsish targetType: "no.target", "cadence", "speed.zone"
+            if "hr_low" or "hr_high" or "hr_zone" in own_step:
+                # Set the HR intensity
+                # check if we are using a HR zone or a custom range
+                if "hr_zone" in own_step:
+                    raise OwnFormatDataObjectNotImplementedError("hr_zone", own_step)
+                else:
+                    # Custom HR range. Check that we have both of them
+                    if "hr_low" in own_step and "hr_high" not in own_step:
+                        raise OwnFormatDataObjectError("hr_high", own_step)
+                    if "hr_low" not in own_step and "hr_high" in own_step:
+                        raise OwnFormatDataObjectError("hr_low", own_step)
 
+                    garmin_step["targetType"] = {
+                        "workoutTargetTypeId": 4,
+                        "workoutTargetTypeKey": "heart.rate.zone"
+                    }
+                    garmin_step["targetValueOne"] = own_step["hr_low"]
+                    garmin_step["targetValueTwo"] = own_step["hr_high"]
+
+            elif "pace_from" or "pace_to" in own_step:
+                # Set the pace
                 if "pace_from" in own_step and "pace_to" not in own_step:
                     raise OwnFormatDataObjectError("pace_to", own_step)
                 if "pace_from" not in own_step and "pace_to" in own_step:
