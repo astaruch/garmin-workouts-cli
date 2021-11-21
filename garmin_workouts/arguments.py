@@ -85,5 +85,9 @@ class CLI:
         import_parser.add_argument(
             '-f', '--file', type=str, help='Path to the file containing '
             'workouts definition', dest='import_file')
+        import_parser.add_argument(
+            '--save-to-file', help='Save imported workout into a file with its'
+            ' ID', action='store_true', dest='import_save_to_file'
+        )
 
         return self.parser.parse_args()

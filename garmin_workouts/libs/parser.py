@@ -49,6 +49,9 @@ class WorkoutParser():
         else:
             return None
 
+    def set_workout_id(self, workout_id):
+        self._own_format["id"] = workout_id
+
     def parse(self):
         # type: (None) -> None
         """

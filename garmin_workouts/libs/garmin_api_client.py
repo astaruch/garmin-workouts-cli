@@ -97,9 +97,10 @@ class GarminApiClient():
         response.raise_for_status()
 
         response_json = response.json()
-        new_workout_url = f"https://connect.garmin.com/modern/workout/{response_json['workoutId']}"
+        workout_id = response_json["workoutId"]
+        new_workout_url = f"https://connect.garmin.com/modern/workout/{workout_id}"
         log.info(f'New workout created: {new_workout_url}')
-        return response_json
+        return workout_id, response_json
 
     def update_existing_workout(self, workout_json, workout_name, workout_id):
         log.info(f"Updating existing workout '{workout_id}' with the name '{workout_name}'")

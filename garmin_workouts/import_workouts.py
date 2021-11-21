@@ -10,9 +10,9 @@ log = logging.getLogger(__name__)
 
 class Import():
     def __init__(self, args, session):
-
         self.filename = args.import_file
         self.api_client = GarminApiClient(session=session)
+        self._save_to_file = args.import_save_to_file
         self.import_workouts()
 
     def import_workouts(self):
@@ -32,7 +32,18 @@ class Import():
                                                     workout_name,
                                                     workout_id)
         else:
-            self.api_client.upload_new_workout(workout_json, workout_name)
+            workout_id, _ = self.api_client.upload_new_workout(workout_json, workout_name)
+
+        workout_parser.set_workout_id(workout_id)
+        # Store the uploaded workout into the YAML file, so we can use
+        # it for the future. Use the workout ID in the name
+        if self._save_to_file:
+            stored_workout_name = f'workout_{workout_id}.yml'
+            with open(stored_workout_name, 'w') as outfile:
+                yaml.safe_dump(data=workout_parser.get_own_format(),
+                               default_flow_style=False,
+                               stream=outfile)
+                log.info('Workout saved to "%s"' % stored_workout_name)
 
     def parse_yaml_file(self, filename):
         with open(filename, 'r') as infile:
