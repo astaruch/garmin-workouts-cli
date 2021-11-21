@@ -42,6 +42,7 @@ class Import():
             with open(stored_workout_name, 'w') as outfile:
                 yaml.safe_dump(data=workout_parser.get_own_format(),
                                default_flow_style=False,
+                               sort_keys=False,
                                stream=outfile)
                 log.info('Workout saved to "%s"' % stored_workout_name)
 

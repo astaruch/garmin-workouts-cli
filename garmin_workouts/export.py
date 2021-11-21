@@ -120,8 +120,8 @@ class Export():
 
     def _write_to_stream(self, to_export):
         if self.stdout:
-            print(yaml.dump(to_export, default_flow_style=False))
+            print(yaml.dump(to_export, default_flow_style=False, sort_keys=False))
         else:
             with open(self.filename, 'w') as outfile:
                 log.info('Storing workouts to the "%s"' % self.filename)
-                yaml.dump(to_export, outfile)
+                yaml.dump(to_export, outfile, sort_keys=False)
