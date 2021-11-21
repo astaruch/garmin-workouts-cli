@@ -50,10 +50,12 @@ class Export():
             else:
                 self.filename = args.export_file
 
-    def _get_and_parse_workout(self, id):
+        self._no_steps = args.export_no_steps
+
+    def _get_and_parse_workout(self, id) -> WorkoutParser:
         garmin_workout = self.api_client.get_workout_details(id)
         workout_parser = WorkoutParser(garmin_format=garmin_workout)
-        return workout_parser.get_own_format()
+        return workout_parser
 
     def _export(self):
         to_export = {
@@ -71,20 +73,23 @@ class Export():
                     try:
                         log.info(f'Done {count}/{total_count}...')
                         count += 1
-                        workout_parser = WorkoutParser(garmin_format=garmin_workout)
+                        parsed_workout = WorkoutParser(garmin_format=garmin_workout)
+                        if self._no_steps:
+                            parsed_workout.remove_steps()
                     except GarminConnectNotImplementedError as err:
                         to_export["error"] = "parsing error"
                         to_export["workouts"] = workouts
                         self.filename = "failed_workouts.yml"
                         self._write_to_stream(to_export)
                         raise err
-                    own_format_workout = workout_parser.get_own_format()
-                    workouts.append(own_format_workout)
+                    workouts.append(parsed_workout.get_own_format())
         else:
             # Get a specific workout, if ID was given as argument
             if self._workout_id:
-                own_format_workout = self._get_and_parse_workout(self._workout_id)
-                workouts.append(own_format_workout)
+                parsed_workout = self._get_and_parse_workout(self._workout_id)
+                if self._no_steps:
+                    parsed_workout.remove_steps()
+                workouts.append(parsed_workout.get_own_format())
             else:
                 # Get all workouts
                 garmin_workouts_info = self.api_client.\
@@ -94,12 +99,18 @@ class Export():
                 for garmin_workout_info in garmin_workouts_info:
                     try:
                         workout_info = WorkoutsInfoParser(garmin_workout_info)
-                        if self._export_runs and workout_info.is_run():
-                            id = workout_info.get_id()
-                            own_format_workout = self._get_and_parse_workout(id)
-                            log.info(f'Done {count}/{total_count}...')
-                            count += 1
-                            workouts.append(own_format_workout)
+                        if not (self._export_runs and workout_info.is_run()):
+                            continue
+
+                        id = workout_info.get_id()
+                        parsed_workout = self._get_and_parse_workout(id)
+                        parsed_workout.set_workout_id(id)
+                        log.info(f'Done {count}/{total_count}...')
+
+                        if self._no_steps:
+                            parsed_workout.remove_steps()
+                        count += 1
+                        workouts.append(parsed_workout.get_own_format())
                     except GarminConnectNotImplementedError as err:
                         if err.property != "sportType.sportTypeKey":
                             # NOTE: Raise only different sports

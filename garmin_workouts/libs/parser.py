@@ -50,6 +50,9 @@ class WorkoutParser():
     def set_workout_id(self, workout_id):
         self._own_format["id"] = workout_id
 
+    def remove_steps(self):
+        self._own_format.pop("steps")
+
     def parse(self):
         # type: (None) -> None
         """

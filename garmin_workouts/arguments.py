@@ -80,6 +80,11 @@ class CLI:
             ' from Garmin Connect, load workouts from given file.',
             dest='export_garmin_workouts_file'
         )
+        export_parser.add_argument(
+            '--no-steps', help='Export only the workouts info without '
+            'steps', dest='export_no_steps', action='store_true'
+        )
+
         import_parser = subparsers.add_parser(
             'import', help='Import workouts to the Garmin Connect from a file')
         import_parser.add_argument(
