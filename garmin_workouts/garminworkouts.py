@@ -8,6 +8,7 @@ from arguments import CLI
 from login import Login
 from export import Export
 from import_workouts import Import
+from remove import Remove
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -35,6 +36,8 @@ def main():
             Export(args, session)
         elif args.command == 'import':
             Import(args, session)
+        elif args.command in ('rm', 'remove'):
+            Remove(args, session)
         else:
             cli.print_help()
 

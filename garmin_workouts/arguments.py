@@ -63,7 +63,7 @@ class CLI:
             help="Limit maximum number of workout",
         )
         export_parser.add_argument(
-            '--workout-id', type=int, dest='export_workout_id',
+            '--id', type=int, dest='export_workout_id',
             help="Download the specific workout with a given ID",
         )
         export_parser.add_argument(
@@ -131,7 +131,7 @@ class CLI:
             dest='remove_regex'
         )
         remove_parser.add_argument(
-            '--workout-id', action='append', metavar='ID',
+            '--id', action='append', metavar='ID',
             help='The ID of workout to remove (can be defined multiple times)',
             dest='remove_workout_id_optional'
         )
