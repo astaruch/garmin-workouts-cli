@@ -63,7 +63,7 @@ class CLI:
             help="Limit maximum number of workout",
         )
         export_parser.add_argument(
-            '--workout-id', type=int, dest='export_workout_id',
+            '--id', type=int, dest='export_workout_id',
             help="Download the specific workout with a given ID",
         )
         export_parser.add_argument(
@@ -93,6 +93,41 @@ class CLI:
         import_parser.add_argument(
             '--save-to-file', help='Save imported workout into a file with its'
             ' ID', action='store_true', dest='import_save_to_file'
+        )
+
+        remove_parser = subparsers.add_parser(
+            'rm', aliases=['remove'], help='Remove one or more workouts from '
+            ' Garmin Connect'
+        )
+        remove_parser.add_argument(
+            'WORKOUT_ID', nargs='*', help='The ID of workout to remove',
+        )
+        remove_parser.add_argument(
+            '--all', action='store_true',
+            help='Remove all workouts', dest='remove_all'
+        )
+        remove_parser.add_argument(
+            '--all-runs', action='store_true',
+            help='Remove all run workouts', dest='remove_all_runs'
+        )
+        remove_parser.add_argument(
+            '--force', '-f', action='store_true',
+            help="Don't prompt before removal", dest='remove_force'
+        )
+        remove_parser.add_argument(
+            '--name', action='append', metavar='NAME',
+            help='The name of workout to remove (can be defined multiple times)',
+            dest='remove_workout_name'
+        )
+        remove_parser.add_argument(
+            '--regex', '-r', metavar='REG',
+            help='All workouts with name matching this regex will be deleted',
+            dest='remove_regex'
+        )
+        remove_parser.add_argument(
+            '--id', action='append', metavar='ID',
+            help='The ID of workout to remove (can be defined multiple times)',
+            dest='remove_workout_id_optional'
         )
 
         return self.parser.parse_args()

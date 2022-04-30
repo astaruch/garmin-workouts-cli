@@ -1,5 +1,6 @@
 
 import logging
+import libs.garmin_api_client
 
 
 from libs.conversions import \
@@ -437,7 +438,6 @@ class WorkoutParser():
 
         return garmin_step
 
-
 class WorkoutsInfoParser():
     """
     Object to parse Garmin Connect API info about workout, not the
@@ -456,17 +456,41 @@ class WorkoutsInfoParser():
             raise GarminConnectObjectError("sportType", self._workout_info)
 
         self._own_info["id"] = self._workout_info["workoutId"]
+        self._own_info["name"] = self._workout_info["workoutName"]
+
 
         sport_type = self._workout_info["sportType"]["sportTypeKey"]
         if sport_type == "running":
             self._own_info["type"] = "running"
+        elif sport_type == "swimming":
+            self._own_info["type"] = "swimming"
         else:
             raise GarminConnectNotImplementedError("sportType.sportTypeKey",
                                                    sport_type,
                                                    self._workout_info)
 
+        self.url = libs.garmin_api_client.get_workout_url(self.get_id())
+
+    def get_type(self):
+        return self._own_info["type"]
+
     def is_run(self):
-        return self._own_info["type"] == "running"
+        return self.get_type() == "running"
+
+    def is_swim(self):
+        return self.get_type() == "swimming"
 
     def get_id(self):
         return self._own_info["id"]
+
+    def get_name(self):
+        return self._own_info["name"]
+
+    def get_url(self):
+        return self.url
+
+    # def __repr__(self) -> str:
+        # return
+
+    def __str__(self) -> str:
+        return f"id={self.get_id()} type={self.get_type()} name='{self.get_name()}'"

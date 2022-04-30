@@ -4,9 +4,12 @@ import os
 import re
 import requests
 import json
+from typing import List
 from fake_useragent import UserAgent
 
 from appdirs import AppDirs
+
+from libs.parser import WorkoutsInfoParser
 
 APP_NAME = 'garmin-workouts-cli'
 
@@ -57,7 +60,41 @@ class GarminApiClient():
 
         log.info('Logged out')
 
-    def get_workouts_info(self, limit, order_seq):
+    def delete_workout(self, workout_id):
+        log.info(f"Deleting workout with ID '{workout_id}'")
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Accept-Language": "en-US,en;q=0.5",
+            "NK": "NT",
+            "Referer": f"https://connect.garmin.com/modern/workouts",
+            "Content-Type": "application/json",
+            "X-HTTP-Method-Override": "DELETE",
+        }
+        response = self.session.post(
+            f"https://connect.garmin.com/modern/proxy/workout-service/workout/{workout_id}",
+            headers=headers)
+
+        try:
+            response.raise_for_status()
+            log.info('Workout deleted')
+        except requests.exceptions.HTTPError as err:
+            if response.status_code == 404:
+                log.info('Workout with given ID doesn\'t exist')
+                log.info(err)
+            elif response.status_code == 403:
+                log.info("Can't access workout with given ID")
+                log.info(err)
+            else:
+                raise err
+
+    @staticmethod
+    def get_workout_url(workout_id) -> str:
+        return f"https://connect.garmin.com/modern/workout/{workout_id}"
+
+    def get_workout_api_url(self, workout_id):
+        return f"https://connect.garmin.com/modern/proxy/workout-service/workout/{workout_id}"
+
+    def get_workouts_info(self, limit=999, order_seq='DESC'):
         # type: (int, str) -> object
         workouts_url = "https://connect.garmin.com/proxy/workout-service/workouts"
         workouts_params = {
@@ -75,6 +112,15 @@ class GarminApiClient():
         workouts_response.raise_for_status()
 
         return json.loads(workouts_response.text)
+
+    def get_all_runs_info(self) -> List[WorkoutsInfoParser]:
+        all_workouts_info = self.get_workouts_info()
+        run_workouts_info = []
+        for workout_info in all_workouts_info:
+            workout = WorkoutsInfoParser(workout_info)
+            if workout.is_run():
+                run_workouts_info.append(workout)
+        return run_workouts_info
 
     def get_workout_details(self, id):
         workout_url = f'https://connect.garmin.com/proxy/workout-service/workout/{id}'
@@ -172,3 +218,5 @@ class GarminApiClient():
             raise Exception("Unable to extract auth ticket URL from:\n%s" % auth_response)
         auth_ticket_url = match.group(1).replace("\\", "")
         return auth_ticket_url
+
+get_workout_url = GarminApiClient.get_workout_url
