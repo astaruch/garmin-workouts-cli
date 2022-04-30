@@ -115,12 +115,6 @@ class CLI:
             help="Don't prompt before removal", dest='remove_force'
         )
         remove_parser.add_argument(
-            '--helper-file', metavar='FILE',
-            help='The filepath where is stored NAME:ID of available workouts. '
-            'This can speed-up the execution. Use `export` to generate such file',
-            dest='remove_workout_name'
-        )
-        remove_parser.add_argument(
             '--name', action='append', metavar='NAME',
             help='The name of workout to remove (can be defined multiple times)',
             dest='remove_workout_name'

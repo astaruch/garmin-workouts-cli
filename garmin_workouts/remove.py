@@ -43,6 +43,12 @@ class Remove():
         if args.remove_all_runs:
             self._workouts_info = self.api_client.get_all_runs_info()
 
+        if args.remove_regex:
+            raise NotImplementedError
+
+        if args.name:
+            raise NotImplementedError
+
     def _remove(self):
         for workout_info in self._workouts_info:
             if self._prompt:

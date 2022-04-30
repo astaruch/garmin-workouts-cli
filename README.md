@@ -92,7 +92,6 @@ optional arguments:
   --all                Remove all workouts
   --all-runs           Remove all run workouts
   --force, -f          Don't prompt before removal
-  --helper-file FILE   The filepath where is stored NAME:ID of available workouts. This can speed-up the execution. Use `export` to generate such file
   --name NAME          The name of workout to remove (can be defined multiple times)
   --regex REG, -r REG  All workouts with name matching this regex will be deleted
   --id ID              The ID of workout to remove (can be defined multiple times)
