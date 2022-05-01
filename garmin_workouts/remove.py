@@ -46,6 +46,8 @@ class Remove():
         if args.remove_all_bikes:
             self._workouts_info += self.api_client.get_all_bikes_info()
 
+        if args.remove_all_swims:
+            self._workouts_info += self.api_client.get_all_swims_info()
 
         if args.remove_all:
             raise NotImplementedError
