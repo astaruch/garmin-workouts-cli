@@ -464,6 +464,8 @@ class WorkoutsInfoParser():
             self._own_info["type"] = "running"
         elif sport_type == "swimming":
             self._own_info["type"] = "swimming"
+        elif sport_type == "cycling":
+            self._own_info["type"] = "cycling"
         else:
             raise GarminConnectNotImplementedError("sportType.sportTypeKey",
                                                    sport_type,
@@ -479,6 +481,9 @@ class WorkoutsInfoParser():
 
     def is_swim(self):
         return self.get_type() == "swimming"
+
+    def is_bike(self):
+        return self.get_type() == "cycling"
 
     def get_id(self):
         return self._own_info["id"]
