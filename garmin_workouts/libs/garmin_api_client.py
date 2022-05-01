@@ -122,6 +122,15 @@ class GarminApiClient():
                 run_workouts_info.append(workout)
         return run_workouts_info
 
+    def get_all_bikes_info(self) -> List[WorkoutsInfoParser]:
+        all_workouts_info = self.get_workouts_info()
+        bike_workouts_info = []
+        for workout_info in all_workouts_info:
+            workout = WorkoutsInfoParser(workout_info)
+            if workout.is_bike():
+                bike_workouts_info.append(workout)
+        return bike_workouts_info
+
     def get_workout_details(self, id):
         workout_url = f'https://connect.garmin.com/proxy/workout-service/workout/{id}'
         workout_response = self.session.get(workout_url)

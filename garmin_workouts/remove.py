@@ -41,7 +41,14 @@ class Remove():
 
         # 3. All runs
         if args.remove_all_runs:
-            self._workouts_info = self.api_client.get_all_runs_info()
+            self._workouts_info += self.api_client.get_all_runs_info()
+
+        if args.remove_all_bikes:
+            self._workouts_info += self.api_client.get_all_bikes_info()
+
+
+        if args.remove_all:
+            raise NotImplementedError
 
         if args.remove_regex:
             raise NotImplementedError

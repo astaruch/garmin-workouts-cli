@@ -111,6 +111,10 @@ class CLI:
             help='Remove all run workouts', dest='remove_all_runs'
         )
         remove_parser.add_argument(
+            '--all-bikes', action='store_true',
+            help='Remove all bike workouts', dest='remove_all_bikes'
+        )
+        remove_parser.add_argument(
             '--force', '-f', action='store_true',
             help="Don't prompt before removal", dest='remove_force'
         )
