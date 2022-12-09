@@ -15,6 +15,8 @@ class Export():
     def __init__(self, args, session):
         self._parse_args(args)
         self.api_client = GarminApiClient(session=session)
+        with open("json_workouts.json", 'w') as outfile:
+            outfile.write("")
         self._export()
 
     def _parse_args(self, args):
@@ -54,6 +56,8 @@ class Export():
 
     def _get_and_parse_workout(self, id) -> WorkoutParser:
         garmin_workout = self.api_client.get_workout_details(id)
+        with open("json_workouts.json", 'a') as outfile:
+            outfile.write(json.dumps(garmin_workout, indent=2))
         workout_parser = WorkoutParser(garmin_format=garmin_workout)
         return workout_parser
 
